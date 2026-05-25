@@ -43,7 +43,7 @@ async function request<T>(
     if (res.status === 401 && retry) {
         const refreshed = await tryRefresh();
         if (refreshed) return request<T>(path, options, false);
-        window.dispatchEvent(new Event('auth: logout'));
+        window.dispatchEvent(new Event('auth:logout'));
         throw new Error('Nicht autorisiert');
     }
 
