@@ -49,7 +49,7 @@ export default function Topbar({
             </div>
 
             {/* Search */}
-            <div className="relative w-[280px] shrink-0">
+            <div className="relative w-70 shrink-0">
                 <Icon
                     name="search"
                     size={14}
@@ -68,7 +68,7 @@ export default function Topbar({
                     onFocus={() => setFocused(true)}
                     onBlur={() => setFocused(false)}
                     className={`
-            w-full h-[30px] pl-8 pr-3 rounded-md text-[12.5px] text-text
+            w-full h-7.5 pl-8 pr-3 rounded-md text-[12.5px] text-text
             bg-surface border transition-colors duration-100 outline-none font-sans
             placeholder:text-muted
             ${focused ? 'border-border-strong bg-bg' : 'border-border'}
@@ -80,7 +80,7 @@ export default function Topbar({
             <button className="relative text-muted hover:text-text p-1.5 rounded-md transition-colors">
                 <Icon name="bell" size={17} />
                 {notificationCount > 0 && (
-                    <span className="absolute top-1 right-1 w-[7px] h-[7px] rounded-full bg-orange-500 border-[1.5px] border-bg" />
+                    <span className="absolute top-1 right-1 w-1.75 h-1.75 rounded-full bg-orange-500 border-[1.5px] border-bg" />
                 )}
             </button>
         </header>

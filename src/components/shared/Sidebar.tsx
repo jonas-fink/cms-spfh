@@ -53,7 +53,7 @@ export default function Sidebar() {
                             key={item.path}
                             to={item.path}
                             className={`
-                flex items-center gap-[9px] px-2.5 py-[7px] rounded-md text-[13px]
+                flex items-center gap-2.25 px-2.5 py-1.75 rounded-md text-[13px]
                 transition-colors duration-100 mb-px no-underline
                 ${
                     active
@@ -69,7 +69,7 @@ export default function Sidebar() {
                             />
                             <span className="flex-1">{item.label}</span>
                             {!!item.badge && (
-                                <span className="bg-accent text-white text-[10px] font-semibold rounded-full px-1.5 py-px min-w-[18px] text-center">
+                                <span className="bg-accent text-white text-[10px] font-semibold rounded-full px-1.5 py-px min-w-4.5 text-center">
                                     {item.badge}
                                 </span>
                             )}
