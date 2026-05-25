@@ -89,3 +89,35 @@ export interface AuthUser {
 export interface ApiResponse<T> {
     data: T;
 }
+
+// Client Details
+
+export type FKMap = Record<string, { name: string; color: string }>;
+
+export type ActiveTab =
+    | 'uebersicht'
+    | 'termine'
+    | 'dokumente'
+    | 'hilfeplan'
+    | 'verlauf';
+
+export type ApptFilter = 'alle' | 'geplant' | 'durchgeführt' | 'ausgefallen';
+
+export interface ClientDoc {
+    id: string;
+    clientId: string;
+    uploadedBy: string;
+    fileName: string;
+    fileType: 'pdf' | 'docx';
+    size: string;
+    uploadedAt: string;
+    description?: string;
+}
+
+export interface VerlaufEntry {
+    id: string;
+    date: string;
+    type: 'termin' | 'dokument' | 'hilfeplan' | 'notiz';
+    title: string;
+    sub?: string;
+}

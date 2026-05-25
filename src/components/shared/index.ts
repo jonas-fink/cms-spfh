@@ -11,3 +11,6 @@ export { default as KPICard } from './KPICard';
 export { default as HoursRing } from './HoursRing';
 export { default as SectionHeader } from './SectionHeader';
 export { default as UtilBar } from './UtilBar';
+export { default as GoalCheck } from './GoalCheck';
+export { TabBtn } from './TabBtn';
+export { FilterBtn } from './FilterBtn';

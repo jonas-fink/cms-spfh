@@ -1,0 +1,1 @@
+export { TabDokumente } from './TabDokumente';

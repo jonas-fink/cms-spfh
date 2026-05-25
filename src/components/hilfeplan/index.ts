@@ -1,0 +1,1 @@
+export { TabHilfePlan } from './TabHilfePlan';

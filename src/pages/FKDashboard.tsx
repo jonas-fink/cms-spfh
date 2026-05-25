@@ -264,7 +264,7 @@ export default function FKDashboard() {
 
     if (loading) {
         return (
-            <div className="px-8 pt-7 pb-16 max-w-[1280px] mx-auto">
+            <div className="px-8 pt-7 pb-16 max-w-7xl mx-auto">
                 <div className="flex items-center gap-3 text-muted text-[13px]">
                     <Icon name="clock" size={14} />
                     Lade Dashboard…
@@ -275,7 +275,7 @@ export default function FKDashboard() {
 
     if (error) {
         return (
-            <div className="px-8 pt-7 pb-16 max-w-[1280px] mx-auto">
+            <div className="px-8 pt-7 pb-16 max-w-7xl mx-auto">
                 <div
                     className="flex items-center gap-2 text-[13px]"
                     style={{ color: '#dc2626' }}
@@ -288,7 +288,7 @@ export default function FKDashboard() {
     }
 
     return (
-        <div className="px-8 pt-7 pb-16 max-w-[1280px] mx-auto">
+        <div className="px-8 pt-7 pb-16 max-w-7xl mx-auto">
             {/* ── 2-Spalten-Grid ── */}
             <div
                 className="grid gap-6"
