@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface UtilBarProps {
     percent: number;
     className?: string;
@@ -28,7 +26,7 @@ export default function UtilBar({ percent, className = '' }: UtilBarProps) {
                 />
             </div>
             <span
-                className="text-[12px] font-medium tabular-nums min-w-[34px] text-right"
+                className="text-[12px] font-medium tabular-nums min-w-8.5 text-right"
                 style={{ color }}
             >
                 {Math.round(percent)}%

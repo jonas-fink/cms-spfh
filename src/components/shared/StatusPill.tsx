@@ -1,5 +1,3 @@
-import React from 'react';
-
 export type StatusValue =
     | 'aktiv'
     | 'pausiert'
@@ -33,7 +31,7 @@ export default function StatusPill({ status, size = 'sm' }: StatusPillProps) {
         <span
             className={`
       inline-flex items-center rounded-full font-medium whitespace-nowrap
-      ${size === 'sm' ? 'text-[11px] px-[7px] py-[2px]' : 'text-[12px] px-[9px] py-[3px]'}
+      ${size === 'sm' ? 'text-[11px] px-1.75 py-0.5' : 'text-[12px] px-2.25 py-0.75'}
       ${statusStyles[status] ?? 'bg-slate-400/15 text-slate-500'}
     `}
         >
