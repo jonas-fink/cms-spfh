@@ -14,3 +14,4 @@ export { default as UtilBar } from './UtilBar';
 export { default as GoalCheck } from './GoalCheck';
 export { TabBtn } from './TabBtn';
 export { FilterBtn } from './FilterBtn';
+export { default as ErrorBoundary } from './ErrorBoundary';

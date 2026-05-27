@@ -1,35 +1,7 @@
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { api, setAccessToken, tryRefresh } from '../utils/api';
-
-interface AuthUser {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: 'fachkraft' | 'admin';
-}
-
-interface LoginInput {
-    email: string;
-    password: string;
-}
-
-interface AuthContextValue {
-    user: AuthUser | null;
-    loading: boolean;
-    login: (input: LoginInput) => Promise<void>;
-    logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
+import { AuthContext, type AuthUser, type LoginInput } from './auth';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<AuthUser | null>(null);
@@ -96,12 +68,3 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         </AuthContext.Provider>
     );
 };
-
-export function useAuth(): AuthContextValue {
-    const ctx = useContext(AuthContext);
-    if (!ctx)
-        throw new Error(
-            'useAuth muss innerhalb von <AuthProvider> verwendet werden',
-        );
-    return ctx;
-}

@@ -1,26 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { api } from '../utils/api';
-import { getCurrentWeekDays } from '../utils/format';
+import { getCurrentWeekDays, getISOWeek, isSameDay } from '../utils/format';
 import type { Client, Appointment } from '../types';
+
+export interface UpcomingAppt extends Appointment {
+    clientFamilyName: string;
+}
 
 interface DashboardData {
     clients: Client[];
     appointments: Record<string, Appointment[]>;
-    upcomingThisWeek: Appointment[];
+    upcomingAppts: UpcomingAppt[];
+    minutesPerDay: number[];
+    weekDays: Date[];
+    kw: number;
     kpis: {
         activeClients: number;
         minutesThisWeek: number;
         apptsThisWeek: number;
         openGoals: number;
     };
+    weekCounts: {
+        durchgefuehrt: number;
+        geplant: number;
+    };
     loading: boolean;
     error: string | null;
 }
 
-function isThisWeek(dateStr: string): boolean {
-    const days = getCurrentWeekDays(); // gibt Mon–Son der ISO-KW zurück
-    const d = dateStr.slice(0, 10);
-    return days.some((day) => day.toString() === d);
+function toISODay(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function apptMinutes(a: Appointment): number {
+    return a.durationHours * 60 + a.durationMinutes;
 }
 
 export function useDashboardData(): DashboardData {
@@ -31,6 +47,15 @@ export function useDashboardData(): DashboardData {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const { weekDays, weekDayKeys, kw } = useMemo(() => {
+        const days = getCurrentWeekDays();
+        return {
+            weekDays: days,
+            weekDayKeys: days.map(toISODay),
+            kw: getISOWeek(new Date()),
+        };
+    }, []);
+
     useEffect(() => {
         let cancelled = false;
 
@@ -39,21 +64,22 @@ export function useDashboardData(): DashboardData {
                 setLoading(true);
                 setError(null);
 
-                const clientRes = await api.get<{ data: Client[] }>('/clients');
-                const rawClients = clientRes.data;
+                const clientsRes = await api.get<{ clients: Client[] }>(
+                    '/clients',
+                );
+                const rawClients = clientsRes.clients;
 
                 const apptResults = await Promise.all(
-                    rawClients.map(
-                        (c) =>
-                            api
-                                .get<{ data: Appointment[] }>(
-                                    `/clients/${c.id}/appointments`,
-                                )
-                                .then((r) => ({
-                                    clientId: c.id,
-                                    appts: r.data,
-                                }))
-                                .catch(() => ({ clientId: c.id, appts: [] })), // Einzelfehler isolieren
+                    rawClients.map((c) =>
+                        api
+                            .get<{ appointments: Appointment[] }>(
+                                `/clients/${c.id}/appointments`,
+                            )
+                            .then((r) => ({
+                                clientId: c.id,
+                                appts: r.appointments,
+                            }))
+                            .catch(() => ({ clientId: c.id, appts: [] })),
                     ),
                 );
 
@@ -71,13 +97,9 @@ export function useDashboardData(): DashboardData {
                         .filter(
                             (a) =>
                                 a.status === 'durchgeführt' &&
-                                isThisWeek(a.date),
+                                weekDayKeys.includes(a.date.slice(0, 10)),
                         )
-                        .reduce(
-                            (sum, a) =>
-                                sum + a.durationHours * 60 + a.durationMinutes,
-                            0,
-                        );
+                        .reduce((sum, a) => sum + apptMinutes(a), 0);
 
                     const upcoming = appts
                         .filter(
@@ -111,22 +133,73 @@ export function useDashboardData(): DashboardData {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [weekDayKeys]);
 
-    const allAppts = Object.values(appointments).flat();
-    const apptsThisWeek = allAppts.filter((a) => isThisWeek(a.date));
-    const upcomingThisWeek = apptsThisWeek
-        .filter((a) => a.status === 'geplant')
-        .sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    const derived = useMemo(() => {
+        const allAppts = Object.values(appointments).flat();
+        const weekApptSet = allAppts.filter((a) =>
+            weekDayKeys.includes(a.date.slice(0, 10)),
         );
 
-    const kpis = {
-        activeClients: clients.filter((c) => c.status === 'aktiv').length,
-        minutesThisWeek: clients.reduce((s, c) => s + c.minutesThisWeek, 0),
-        apptsThisWeek: apptsThisWeek.length,
-        openGoals: 0,
-    };
+        const durchgefuehrt = weekApptSet.filter(
+            (a) => a.status === 'durchgeführt',
+        );
+        const geplant = weekApptSet.filter((a) => a.status === 'geplant');
 
-    return { clients, appointments, upcomingThisWeek, kpis, loading, error };
+        const minutesPerDay = weekDays.map((day) =>
+            allAppts
+                .filter(
+                    (a) =>
+                        a.status === 'durchgeführt' &&
+                        isSameDay(new Date(a.date), day),
+                )
+                .reduce((sum, a) => sum + apptMinutes(a), 0),
+        );
+
+        const minutesThisWeek = durchgefuehrt.reduce(
+            (sum, a) => sum + apptMinutes(a),
+            0,
+        );
+
+        const now = new Date();
+        const clientMap = new Map(clients.map((c) => [c.id, c]));
+        const upcomingAppts: UpcomingAppt[] = allAppts
+            .filter((a) => a.status === 'geplant' && new Date(a.date) >= now)
+            .sort(
+                (a, b) =>
+                    new Date(a.date).getTime() - new Date(b.date).getTime(),
+            )
+            .slice(0, 6)
+            .map((a) => ({
+                ...a,
+                clientFamilyName: clientMap.get(a.clientId)?.familyName ?? '–',
+            }));
+
+        const kpis = {
+            activeClients: clients.filter((c) => c.status === 'aktiv').length,
+            minutesThisWeek,
+            apptsThisWeek: weekApptSet.length,
+            openGoals: 0,
+        };
+
+        const weekCounts = {
+            durchgefuehrt: durchgefuehrt.length,
+            geplant: geplant.length,
+        };
+
+        return { upcomingAppts, minutesPerDay, kpis, weekCounts };
+    }, [clients, appointments, weekDays, weekDayKeys]);
+
+    return {
+        clients,
+        appointments,
+        upcomingAppts: derived.upcomingAppts,
+        minutesPerDay: derived.minutesPerDay,
+        weekDays,
+        kw,
+        kpis: derived.kpis,
+        weekCounts: derived.weekCounts,
+        loading,
+        error,
+    };
 }
