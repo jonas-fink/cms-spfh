@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { KPICard, SectionHeader } from '../components/shared';
 import {
     WorkloadTable,
@@ -228,11 +229,8 @@ function avgUtilization(workload: FachkraftWorkload[]): number {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-interface AdminDashboardProps {
-    onNavigate: (pageKey: string, clientId?: string) => void;
-}
-
-export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
+export default function AdminDashboard() {
+    const navigate = useNavigate();
     const [workload] = useState<FachkraftWorkload[]>(MOCK_WORKLOAD);
     const [clients] = useState<Client[]>(MOCK_CLIENTS);
     const [fachkraefte] = useState<Fachkraft[]>(MOCK_FACHKRAEFTE);
@@ -308,11 +306,11 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     title="Fachkraft-Auslastung"
                     sub="Wochenübersicht · geleistete vs. vereinbarte Stunden"
                     action="Alle Fachkräfte"
-                    onAction={() => onNavigate('admin-fachkraefte')}
+                    onAction={() => navigate('/admin/fachkraefte')}
                 />
                 <WorkloadTable
                     data={workload}
-                    onRowClick={(id) => onNavigate('admin-fachkraefte')}
+                    onRowClick={() => navigate('/admin/fachkraefte')}
                 />
             </div>
 
@@ -325,7 +323,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 <ClientDistribution
                     clients={clients}
                     fachkraefte={fachkraefte}
-                    onClientClick={(id) => onNavigate('client-detail', id)}
+                    onClientClick={(id) => navigate(`/clients/${id}`)}
                 />
 
                 {/* Alerts */}

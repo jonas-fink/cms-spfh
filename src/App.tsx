@@ -3,26 +3,26 @@ import RootLayout from './layouts/RootLayout';
 import AppLayout from './layouts/AppLayout';
 import AdminLayout from './layouts/AdminLayout';
 import LoginPage from './pages/LoginPage';
-import FKDashboardPage from './pages/FKDashboardPage';
+import FKDashboard from './pages/FKDashboard';
 import ClientDetailPage from './pages/ClientDetailPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 
 export const router = createBrowserRouter([
     {
-        element: <RootLayout />, // AuthProvider lebt hier, ist im Router-Kontext
+        element: <RootLayout />,
         children: [
             {
                 path: '/login',
                 element: <LoginPage />,
             },
             {
-                element: <AppLayout />, // Sidebar + Topbar + <Outlet />
+                element: <AppLayout />,
                 children: [
                     {
                         index: true,
                         element: <Navigate to="/dashboard" replace />,
                     },
-                    { path: '/dashboard', element: <FKDashboardPage /> },
+                    { path: '/dashboard', element: <FKDashboard /> },
                     {
                         path: '/clients',
                         element: <div>Klienten (Placeholder)</div>,
