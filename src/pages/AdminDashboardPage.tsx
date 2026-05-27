@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KPICard, SectionHeader, Icon } from '../components/shared';
+import { KPICard, SectionHeader } from '../components/shared';
 import {
     WorkloadTable,
     ClientDistribution,
@@ -247,11 +247,11 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     const utilPct = avgUtilization(workload);
 
     return (
-        <div className="px-8 pt-7 pb-16 max-w-[1280px] mx-auto">
+        <div className="px-8 pt-7 pb-16 max-w-7xl mx-auto">
             {/* Page Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-[24px] font-[600] text-text tracking-[-0.02em]">
+                    <h1 className="text-[24px] font-semibold text-text tracking-[-0.02em]">
                         Übersicht
                     </h1>
                     <p className="text-[13px] text-muted mt-0.5">

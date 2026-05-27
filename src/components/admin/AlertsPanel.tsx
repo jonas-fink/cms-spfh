@@ -52,11 +52,11 @@ const AlertsPanel = ({ alerts }: AlertsPanelProps) => {
         <div className="rounded-lg border border-border bg-surface overflow-hidden">
             {/* Header */}
             <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-                <span className="text-[13px] font-[600] text-text tracking-[-0.01em]">
+                <span className="text-[13px] font-semibold text-text tracking-[-0.01em]">
                     Hinweise
                 </span>
                 {alerts.filter((a) => a.severity === 'high').length > 0 && (
-                    <span className="text-[11.5px] font-[500] text-[#dc2626]">
+                    <span className="text-[11.5px] font-medium text-[#dc2626]">
                         {alerts.filter((a) => a.severity === 'high').length}{' '}
                         dringend
                     </span>
@@ -75,7 +75,7 @@ const AlertsPanel = ({ alerts }: AlertsPanelProps) => {
                             )}
                         >
                             {/* Severity dot */}
-                            <div className="pt-[5px] shrink-0">
+                            <div className="pt-1.25 shrink-0">
                                 <div
                                     className={[
                                         'w-1.5 h-1.5 rounded-full',

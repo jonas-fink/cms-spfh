@@ -7,7 +7,7 @@ import {
     useState,
 } from 'react';
 import { useNavigate } from 'react-router';
-import { api, setAccessToken } from '../utils/api';
+import { api, setAccessToken, tryRefresh } from '../utils/api';
 
 interface AuthUser {
     id: string;
@@ -42,15 +42,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         async function init() {
             try {
-                const refreshRes = await fetch('/api/v1/auth/refresh', {
-                    method: 'POST',
-                    credentials: 'include',
-                });
-
-                if (!refreshRes.ok) throw new Error('Keine gültige Session');
-
-                const { data } = await refreshRes.json();
-                setAccessToken(data.accessToken);
+                const ok = await tryRefresh();
+                if (!ok) throw new Error('Keine gültige Session');
 
                 const me = await api.get<AuthUser>('/auth/me');
                 if (!cancelled) setUser(me);

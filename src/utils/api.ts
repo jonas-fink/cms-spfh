@@ -10,19 +10,27 @@ export function getAccessToken(): string | null {
     return accessToken;
 }
 
-async function tryRefresh(): Promise<boolean> {
-    try {
-        const res = await fetch(`${BASE}/auth/refresh`, {
-            method: 'POST',
-            credentials: 'include',
-        });
-        if (!res.ok) return false;
-        const json = await res.json();
-        setAccessToken(json.data.accessToken);
-        return true;
-    } catch {
-        return false;
-    }
+let refreshPromise: Promise<boolean> | null = null;
+
+export function tryRefresh(): Promise<boolean> {
+    if (refreshPromise) return refreshPromise;
+    refreshPromise = (async () => {
+        try {
+            const res = await fetch(`${BASE}/auth/refresh`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+            if (!res.ok) return false;
+            const json = await res.json();
+            setAccessToken(json.data.accessToken);
+            return true;
+        } catch {
+            return false;
+        } finally {
+            refreshPromise = null;
+        }
+    })();
+    return refreshPromise;
 }
 
 async function request<T>(
