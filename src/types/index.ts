@@ -75,6 +75,16 @@ export interface Fachkraft {
     role: 'fachkraft' | 'admin';
 }
 
+// Backend-Shapes (populated Responses)
+
+export interface PopulatedUser {
+    _id: string;
+    id?: string;
+    firstName: string;
+    lastName: string;
+    email?: string;
+}
+
 // Auth-Context User
 
 export interface AuthUser {

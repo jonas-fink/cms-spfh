@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { KPICard, SectionHeader } from '../components/shared';
 import {
@@ -8,210 +8,45 @@ import {
     type FachkraftWorkload,
     type AdminAlert,
 } from '../components/admin';
-import type { Client, Fachkraft } from '../types';
+import { api } from '../utils/api';
+import { FK_COLORS } from '../utils/colors';
+import { getISOWeek } from '../utils/format';
+import type { Client, Fachkraft, PopulatedUser } from '../types';
 
-const MOCK_FACHKRAEFTE: Fachkraft[] = [
-    {
-        id: 'fk1',
-        firstName: 'Anna',
-        lastName: 'Berger',
-        email: 'a.berger@spfh.de',
-        role: 'fachkraft',
-    },
-    {
-        id: 'fk2',
-        firstName: 'Markus',
-        lastName: 'Lehner',
-        email: 'm.lehner@spfh.de',
-        role: 'fachkraft',
-    },
-    {
-        id: 'fk3',
-        firstName: 'Sara',
-        lastName: 'Wolff',
-        email: 's.wolff@spfh.de',
-        role: 'fachkraft',
-    },
-    {
-        id: 'fk4',
-        firstName: 'Tobias',
-        lastName: 'Huber',
-        email: 't.huber@spfh.de',
-        role: 'fachkraft',
-    },
-];
+// ─── Backend-Shapes ──────────────────────────────────────────────────────────
 
-const MOCK_WORKLOAD: FachkraftWorkload[] = [
-    {
-        id: 'fk1',
-        name: 'Anna Berger',
-        color: '#6366f1',
-        activeClients: 4,
-        maxClients: 6,
-        minutesThisWeek: 285,
-        quotaMinutesThisWeek: 360,
-        appointmentsThisWeek: 5,
-        overdueReports: 1,
-    },
-    {
-        id: 'fk2',
-        name: 'Markus Lehner',
-        color: '#0ea5e9',
-        activeClients: 6,
-        maxClients: 6,
-        minutesThisWeek: 390,
-        quotaMinutesThisWeek: 360,
-        appointmentsThisWeek: 7,
-        overdueReports: 2,
-    },
-    {
-        id: 'fk3',
-        name: 'Sara Wolff',
-        color: '#10b981',
-        activeClients: 3,
-        maxClients: 6,
-        minutesThisWeek: 150,
-        quotaMinutesThisWeek: 360,
-        appointmentsThisWeek: 3,
-        overdueReports: 0,
-    },
-    {
-        id: 'fk4',
-        name: 'Tobias Huber',
-        color: '#f59e0b',
-        activeClients: 5,
-        maxClients: 6,
-        minutesThisWeek: 320,
-        quotaMinutesThisWeek: 360,
-        appointmentsThisWeek: 6,
-        overdueReports: 0,
-    },
-];
+interface ApiClient {
+    _id: string;
+    id?: string;
+    familyName: string;
+    caseNumber?: string;
+    assignedFachkraefte: PopulatedUser[];
+    weeklyHoursQuota: number;
+    status: 'aktiv' | 'pausiert' | 'abgeschlossen';
+    startDate: string;
+    children: { name: string; age: number }[];
+}
 
-const MOCK_CLIENTS: Client[] = [
-    {
-        id: 'c1',
-        familyName: 'Müller',
-        caseNumber: 'JA-2024-0312',
-        assignedFachkraefte: ['fk1', 'fk2'],
-        weeklyHoursQuota: 6,
-        minutesThisWeek: 285,
-        status: 'aktiv',
-        startDate: '2024-03-01',
-        children: [
-            { name: 'Lena', age: 8 },
-            { name: 'Tim', age: 5 },
-        ],
-    },
-    {
-        id: 'c2',
-        familyName: 'Schmidt',
-        caseNumber: 'JA-2024-0418',
-        assignedFachkraefte: ['fk1'],
-        weeklyHoursQuota: 4,
-        minutesThisWeek: 120,
-        status: 'aktiv',
-        startDate: '2024-04-15',
-        children: [{ name: 'Max', age: 12 }],
-    },
-    {
-        id: 'c3',
-        familyName: 'Bauer',
-        caseNumber: 'JA-2023-1102',
-        assignedFachkraefte: ['fk3'],
-        weeklyHoursQuota: 3,
-        minutesThisWeek: 90,
-        status: 'aktiv',
-        startDate: '2023-11-01',
-        children: [],
-    },
-    {
-        id: 'c4',
-        familyName: 'Fischer',
-        caseNumber: 'JA-2025-0028',
-        assignedFachkraefte: ['fk2', 'fk4'],
-        weeklyHoursQuota: 8,
-        minutesThisWeek: 200,
-        status: 'aktiv',
-        startDate: '2025-01-10',
-        children: [{ name: 'Anna', age: 3 }],
-    },
-    {
-        id: 'c5',
-        familyName: 'Wagner',
-        caseNumber: 'JA-2024-0891',
-        assignedFachkraefte: ['fk4'],
-        weeklyHoursQuota: 4,
-        minutesThisWeek: 60,
-        status: 'pausiert',
-        startDate: '2024-09-01',
-        children: [
-            { name: 'Ella', age: 7 },
-            { name: 'Noah', age: 9 },
-        ],
-    },
-    {
-        id: 'c6',
-        familyName: 'Weber',
-        caseNumber: 'JA-2025-0145',
-        assignedFachkraefte: ['fk3'],
-        weeklyHoursQuota: 5,
-        minutesThisWeek: 0,
-        status: 'aktiv',
-        startDate: '2025-02-20',
-        children: [],
-    },
-];
+interface ApiWorkloadEntry {
+    fachkraft: { id: string; name: string; email: string };
+    clientCount: number;
+    quotaMinutes: number;
+    workedMinutes: number;
+    performedMinutes: number;
+    cancelledCreditedCount: number;
+    cancelledCreditMinutes: number;
+    utilizationPercent: number;
+    appointmentsThisWeek: number;
+    overdueReports: number;
+}
 
-const MOCK_ALERTS: AdminAlert[] = [
-    {
-        id: 'a1',
-        severity: 'high',
-        title: 'Bericht überfällig – Familie Müller',
-        description:
-            'Termin vom 20.05. wurde noch nicht dokumentiert. Fachkraft: Anna Berger.',
-        createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-    },
-    {
-        id: 'a2',
-        severity: 'high',
-        title: '2 Berichte überfällig – Markus Lehner',
-        description: 'Termine vom 19.05. und 21.05. ohne Dokumentation.',
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-    {
-        id: 'a3',
-        severity: 'med',
-        title: 'Auslastung überschritten – Markus Lehner',
-        description:
-            'Wochenquote um 8% überschritten. Ggf. Klient neu zuweisen.',
-        createdAt: new Date(Date.now() - 3600000 * 6).toISOString(),
-    },
-    {
-        id: 'a4',
-        severity: 'med',
-        title: 'HilfePlan abgelaufen – Familie Fischer',
-        description:
-            'HilfePlan v2 ist seit 14 Tagen nicht aktualisiert worden.',
-        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    },
-    {
-        id: 'a5',
-        severity: 'low',
-        title: 'Neue Fachkraft eingeladen',
-        description: 'Tobias Huber hat sein Passwort noch nicht gesetzt.',
-        createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-    },
-];
+const MAX_CLIENTS_PER_FK = 6;
 
-// ─── KPI-Berechnungen ─────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getKWString(): string {
     const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const days = Math.floor((now.getTime() - startOfYear.getTime()) / 86400000);
-    const kw = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-    return `KW ${kw} · ${now.getFullYear()}`;
+    return `KW ${getISOWeek(now)} · ${now.getFullYear()}`;
 }
 
 function avgUtilization(workload: FachkraftWorkload[]): number {
@@ -227,14 +62,134 @@ function avgUtilization(workload: FachkraftWorkload[]): number {
     return Math.round((sum / workload.length) * 100);
 }
 
+function deriveAlerts(workload: FachkraftWorkload[]): AdminAlert[] {
+    const alerts: AdminAlert[] = [];
+    for (const fk of workload) {
+        if (fk.overdueReports > 0) {
+            alerts.push({
+                id: `overdue-${fk.id}`,
+                severity: 'high',
+                title: `${fk.overdueReports} Bericht${fk.overdueReports > 1 ? 'e' : ''} überfällig – ${fk.name}`,
+                description:
+                    'Durchgeführte Termine der letzten 14 Tage ohne Dokumentation.',
+                createdAt: new Date().toISOString(),
+            });
+        }
+        const pct =
+            fk.quotaMinutesThisWeek > 0
+                ? Math.round(
+                      (fk.minutesThisWeek / fk.quotaMinutesThisWeek) * 100,
+                  )
+                : 0;
+        if (pct > 105) {
+            alerts.push({
+                id: `overload-${fk.id}`,
+                severity: 'med',
+                title: `Auslastung überschritten – ${fk.name}`,
+                description: `Wochenquote um ${pct - 100}% überschritten. Ggf. Klient neu zuweisen.`,
+                createdAt: new Date().toISOString(),
+            });
+        } else if (pct > 0 && pct < 50) {
+            alerts.push({
+                id: `under-${fk.id}`,
+                severity: 'low',
+                title: `Geringe Auslastung – ${fk.name}`,
+                description: `Nur ${pct}% der Wochenquote erreicht.`,
+                createdAt: new Date().toISOString(),
+            });
+        }
+    }
+    return alerts;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminDashboard() {
     const navigate = useNavigate();
-    const [workload] = useState<FachkraftWorkload[]>(MOCK_WORKLOAD);
-    const [clients] = useState<Client[]>(MOCK_CLIENTS);
-    const [fachkraefte] = useState<Fachkraft[]>(MOCK_FACHKRAEFTE);
-    const [alerts] = useState<AdminAlert[]>(MOCK_ALERTS);
+    const [workload, setWorkload] = useState<FachkraftWorkload[]>([]);
+    const [clients, setClients] = useState<Client[]>([]);
+    const [fachkraefte, setFachkraefte] = useState<Fachkraft[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function load() {
+            try {
+                setLoading(true);
+                setError(null);
+
+                const [workloadRes, clientsRes] = await Promise.all([
+                    api.get<ApiWorkloadEntry[]>('/stats/workload'),
+                    api.get<ApiClient[]>('/clients'),
+                ]);
+
+                if (cancelled) return;
+
+                const mappedWorkload: FachkraftWorkload[] = workloadRes.map(
+                    (w, i) => ({
+                        id: w.fachkraft.id,
+                        name: w.fachkraft.name,
+                        color: FK_COLORS[i % FK_COLORS.length],
+                        activeClients: w.clientCount,
+                        maxClients: MAX_CLIENTS_PER_FK,
+                        minutesThisWeek: w.workedMinutes,
+                        quotaMinutesThisWeek: w.quotaMinutes,
+                        appointmentsThisWeek: w.appointmentsThisWeek,
+                        overdueReports: w.overdueReports,
+                    }),
+                );
+
+                // Fachkräfte-Liste aus Workload-Antwort ableiten
+                // (FK können die /users-Route nicht aufrufen, aber Admin schon –
+                //  workload enthält jedoch alle FKs, also reicht das hier)
+                const mappedFachkraefte: Fachkraft[] = workloadRes.map((w) => {
+                    const [firstName, ...rest] = w.fachkraft.name.split(' ');
+                    return {
+                        id: w.fachkraft.id,
+                        firstName,
+                        lastName: rest.join(' '),
+                        email: w.fachkraft.email,
+                        role: 'fachkraft',
+                    };
+                });
+
+                const mappedClients: Client[] = clientsRes.map((c) => ({
+                    id: c.id ?? c._id,
+                    familyName: c.familyName,
+                    caseNumber: c.caseNumber ?? '',
+                    assignedFachkraefte: c.assignedFachkraefte.map(
+                        (u) => u.id ?? u._id,
+                    ),
+                    weeklyHoursQuota: c.weeklyHoursQuota,
+                    minutesThisWeek: 0,
+                    status: c.status,
+                    startDate: c.startDate,
+                    children: c.children,
+                }));
+
+                setWorkload(mappedWorkload);
+                setFachkraefte(mappedFachkraefte);
+                setClients(mappedClients);
+            } catch (err: unknown) {
+                if (!cancelled)
+                    setError(
+                        (err as Error).message ??
+                            'Fehler beim Laden der Admin-Übersicht',
+                    );
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+
+        load();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const alerts = useMemo(() => deriveAlerts(workload), [workload]);
 
     const activeClients = clients.filter((c) => c.status === 'aktiv').length;
     const totalAppointments = workload.reduce(
@@ -243,6 +198,22 @@ export default function AdminDashboard() {
     );
     const totalOverdue = workload.reduce((s, fk) => s + fk.overdueReports, 0);
     const utilPct = avgUtilization(workload);
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-[50vh] text-[13px] text-red-600">
+                {error}
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-[50vh] text-[13px] text-muted">
+                Lade Admin-Übersicht…
+            </div>
+        );
+    }
 
     return (
         <div className="px-8 pt-7 pb-16 max-w-7xl mx-auto">

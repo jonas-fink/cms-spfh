@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router';
 import {
     ClientDetailHeader,
@@ -8,14 +8,14 @@ import {
 import { TabTermine } from '../components/appointment';
 import { TabDokumente } from '../components/document';
 import { TabHilfePlan } from '../components/hilfeplan';
+import { api } from '../utils/api';
 import {
-    MOCK_CLIENT,
-    MOCK_APPOINTMENTS,
-    MOCK_DOCS,
-    MOCK_HILFEPLAN,
-    MOCK_VERLAUF,
-    MOCK_FK_MAP,
-} from '../mocks/clientDetail.mock';
+    getCurrentWeekDays,
+    formatDate,
+    formatFileSize,
+} from '../utils/format';
+import { pickFkColor } from '../utils/colors';
+import { userId } from '../utils/user';
 import type {
     Client,
     Appointment,
@@ -24,7 +24,39 @@ import type {
     FKMap,
     ActiveTab,
     ApptFilter,
+    VerlaufEntry,
+    PopulatedUser,
 } from '../types';
+
+interface ApiClient extends Omit<
+    Client,
+    'assignedFachkraefte' | 'minutesThisWeek' | 'nextAppt'
+> {
+    _id: string;
+    assignedFachkraefte: PopulatedUser[];
+}
+
+interface ApiAppointment extends Omit<
+    Appointment,
+    'createdBy' | 'clientId' | 'id'
+> {
+    _id: string;
+    id?: string;
+    clientId: string;
+    createdBy: PopulatedUser | string;
+}
+
+interface ApiDocument {
+    id?: string;
+    _id?: string;
+    fileName: string;
+    fileType: 'pdf' | 'docx';
+    fileSizeBytes: number;
+    description?: string;
+    uploadedBy: string;
+    createdAt: string;
+    downloadUrl?: string;
+}
 
 export default function ClientDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -37,24 +69,226 @@ export default function ClientDetailPage() {
     const [activeTab, setActiveTab] = useState<ActiveTab>('uebersicht');
     const [apptFilter, setApptFilter] = useState<ApptFilter>('alle');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!id) return;
-        // TODO: echte API-Calls via Promise.all:
-        // const [c, a, d, h, fk] = await Promise.all([
-        //   api.get(`/clients/${id}`),
-        //   api.get(`/clients/${id}/appointments`),
-        //   api.get(`/clients/${id}/documents`),
-        //   api.get(`/clients/${id}/hilfeplan`),
-        //   api.get('/users'),
-        // ])
-        setClient(MOCK_CLIENT);
-        setAppointments(MOCK_APPOINTMENTS);
-        setDocuments(MOCK_DOCS);
-        setHilfeplan(MOCK_HILFEPLAN);
-        setFkMap(MOCK_FK_MAP);
-        setLoading(false);
+        let cancelled = false;
+
+        async function load(clientId: string) {
+            try {
+                setLoading(true);
+                setError(null);
+
+                const [clientRes, apptRes, docsRes, hilfeplanRes] =
+                    await Promise.all([
+                        api.get<ApiClient>(`/clients/${clientId}`),
+                        api.get<ApiAppointment[]>(
+                            `/clients/${clientId}/appointments`,
+                        ),
+                        api
+                            .get<
+                                ApiDocument[]
+                            >(`/clients/${clientId}/documents`)
+                            .catch(() => [] as ApiDocument[]),
+                        api
+                            .get<HilfePlan>(`/clients/${clientId}/hilfeplan`)
+                            .catch(() => null),
+                    ]);
+
+                if (cancelled) return;
+
+                const apiClient = clientRes;
+                const apiAppointments = apptRes;
+
+                // FKMap aus assignedFachkraefte + Appointment-Creators bauen
+                const map: FKMap = {};
+                let colorIdx = 0;
+                for (const u of apiClient.assignedFachkraefte) {
+                    const uid = u.id ?? u._id;
+                    if (!map[uid]) {
+                        map[uid] = {
+                            name: `${u.firstName} ${u.lastName}`,
+                            color: pickFkColor(colorIdx++),
+                        };
+                    }
+                }
+                for (const a of apiAppointments) {
+                    if (typeof a.createdBy !== 'string') {
+                        const uid = a.createdBy.id ?? a.createdBy._id;
+                        if (!map[uid]) {
+                            map[uid] = {
+                                name: `${a.createdBy.firstName} ${a.createdBy.lastName}`,
+                                color: pickFkColor(colorIdx++),
+                            };
+                        }
+                    }
+                }
+
+                // Appointments normalisieren (createdBy → string)
+                const normalizedAppts: Appointment[] = apiAppointments.map(
+                    (a) => ({
+                        id: a.id ?? a._id,
+                        clientId: a.clientId,
+                        createdBy: userId(a.createdBy),
+                        type: a.type,
+                        status: a.status,
+                        date: a.date,
+                        durationHours: a.durationHours,
+                        durationMinutes: a.durationMinutes,
+                        report: a.report,
+                    }),
+                );
+
+                // minutesThisWeek + nextAppt aus Appointments ableiten
+                const weekKeys = new Set(
+                    getCurrentWeekDays().map((d) =>
+                        d.toISOString().slice(0, 10),
+                    ),
+                );
+                const minutesThisWeek = normalizedAppts
+                    .filter(
+                        (a) =>
+                            a.status === 'durchgeführt' &&
+                            weekKeys.has(a.date.slice(0, 10)),
+                    )
+                    .reduce(
+                        (sum, a) =>
+                            sum + a.durationHours * 60 + a.durationMinutes,
+                        0,
+                    );
+
+                const now = new Date();
+                const upcoming = normalizedAppts
+                    .filter(
+                        (a) =>
+                            a.status === 'geplant' && new Date(a.date) >= now,
+                    )
+                    .sort(
+                        (a, b) =>
+                            new Date(a.date).getTime() -
+                            new Date(b.date).getTime(),
+                    );
+                const nextAppt = upcoming[0]
+                    ? { date: upcoming[0].date, type: upcoming[0].type }
+                    : null;
+
+                const normalizedClient: Client = {
+                    id: apiClient.id ?? apiClient._id,
+                    familyName: apiClient.familyName,
+                    caseNumber: apiClient.caseNumber,
+                    address: apiClient.address,
+                    jugendamtContact: apiClient.jugendamtContact,
+                    assignedFachkraefte: apiClient.assignedFachkraefte.map(
+                        (u) => u.id ?? u._id,
+                    ),
+                    weeklyHoursQuota: apiClient.weeklyHoursQuota,
+                    minutesThisWeek,
+                    status: apiClient.status,
+                    startDate: apiClient.startDate,
+                    children: apiClient.children,
+                    nextAppt,
+                };
+
+                const normalizedDocs: ClientDoc[] = docsRes.map((d) => ({
+                    id: (d.id ?? d._id)!,
+                    clientId,
+                    uploadedBy: d.uploadedBy,
+                    fileName: d.fileName,
+                    fileType: d.fileType,
+                    size: formatFileSize(d.fileSizeBytes),
+                    uploadedAt: d.createdAt,
+                    description: d.description,
+                }));
+
+                setClient(normalizedClient);
+                setAppointments(normalizedAppts);
+                setDocuments(normalizedDocs);
+                setHilfeplan(hilfeplanRes);
+                setFkMap(map);
+            } catch (err: unknown) {
+                if (!cancelled)
+                    setError(
+                        (err as Error).message ??
+                            'Fehler beim Laden des Klienten',
+                    );
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+
+        load(id);
+        return () => {
+            cancelled = true;
+        };
     }, [id]);
+
+    // Verlauf aus echten Daten ableiten (Termine + Dokumente + HilfePlan)
+    const verlauf = useMemo<VerlaufEntry[]>(() => {
+        const entries: VerlaufEntry[] = [];
+
+        for (const a of appointments) {
+            const fkName = fkMap[a.createdBy]?.name.split(' ')[0] ?? '';
+            const durLabel =
+                a.durationHours > 0
+                    ? `${a.durationHours}:${String(a.durationMinutes).padStart(2, '0')}h`
+                    : `${a.durationMinutes} min`;
+            const title =
+                a.status === 'durchgeführt'
+                    ? `${a.type} durchgeführt`
+                    : a.status === 'ausgefallen'
+                      ? `${a.type} ausgefallen`
+                      : `${a.type} geplant`;
+            entries.push({
+                id: `appt-${a.id}`,
+                date: a.date,
+                type: 'termin',
+                title,
+                sub: [durLabel, fkName].filter(Boolean).join(' · '),
+            });
+        }
+
+        for (const d of documents) {
+            entries.push({
+                id: `doc-${d.id}`,
+                date: d.uploadedAt,
+                type: 'dokument',
+                title: 'Dokument hochgeladen',
+                sub: d.fileName,
+            });
+        }
+
+        if (hilfeplan) {
+            entries.push({
+                id: `hp-${hilfeplan.id}`,
+                date: hilfeplan.updatedAt,
+                type: 'hilfeplan',
+                title: `Hilfeplan aktualisiert (Version ${hilfeplan.version})`,
+            });
+        }
+
+        if (client?.startDate) {
+            entries.push({
+                id: 'start',
+                date: client.startDate,
+                type: 'notiz',
+                title: 'Betreuung begonnen',
+                sub: `Start ${formatDate(client.startDate, { dateOnly: true })}`,
+            });
+        }
+
+        return entries.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+    }, [appointments, documents, hilfeplan, client, fkMap]);
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-[50vh] text-[13px] text-red-600">
+                {error}
+            </div>
+        );
+    }
 
     if (loading || !client) {
         return (
@@ -109,9 +343,7 @@ export default function ClientDetailPage() {
                 {activeTab === 'hilfeplan' && (
                     <TabHilfePlan hilfeplan={hilfeplan} />
                 )}
-                {activeTab === 'verlauf' && (
-                    <TabVerlauf verlauf={MOCK_VERLAUF} />
-                )}
+                {activeTab === 'verlauf' && <TabVerlauf verlauf={verlauf} />}
             </div>
         </div>
     );

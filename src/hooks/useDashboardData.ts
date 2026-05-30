@@ -64,21 +64,15 @@ export function useDashboardData(): DashboardData {
                 setLoading(true);
                 setError(null);
 
-                const clientsRes = await api.get<{ clients: Client[] }>(
-                    '/clients',
-                );
-                const rawClients = clientsRes.clients;
+                const rawClients = await api.get<Client[]>('/clients');
 
                 const apptResults = await Promise.all(
                     rawClients.map((c) =>
                         api
-                            .get<{ appointments: Appointment[] }>(
+                            .get<Appointment[]>(
                                 `/clients/${c.id}/appointments`,
                             )
-                            .then((r) => ({
-                                clientId: c.id,
-                                appts: r.appointments,
-                            }))
+                            .then((appts) => ({ clientId: c.id, appts }))
                             .catch(() => ({ clientId: c.id, appts: [] })),
                     ),
                 );
