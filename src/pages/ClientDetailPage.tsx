@@ -320,7 +320,7 @@ export default function ClientDetailPage() {
                 onTabChange={setActiveTab}
             />
 
-            <div className="px-8 pt-6 pb-16 max-w-[1280px] mx-auto">
+            <div className="px-8 pt-6 pb-16 max-w-7xl mx-auto">
                 {activeTab === 'uebersicht' && (
                     <TabUebersicht
                         client={client}
