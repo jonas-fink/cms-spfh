@@ -19,6 +19,7 @@ export default function FKDashboard() {
     const {
         clients,
         upcomingAppts,
+        openTasks,
         minutesPerDay,
         weekDays,
         kw,
@@ -79,6 +80,7 @@ export default function FKDashboard() {
                         totalClients={clients.length}
                         stundenValue={stundenValue}
                         weekCounts={weekCounts}
+                        openGoals={kpis.openGoals}
                     />
 
                     <ClientsGrid
@@ -101,7 +103,10 @@ export default function FKDashboard() {
                         appts={upcomingAppts}
                         onShowAll={() => navigate('/calendar')}
                     />
-                    <OpenTasksRail />
+                    <OpenTasksRail
+                        tasks={openTasks}
+                        onTaskClick={(id) => navigate(`/clients/${id}`)}
+                    />
                 </div>
             </div>
         </div>

@@ -67,6 +67,12 @@ export interface HilfePlan {
     }[];
 }
 
+export interface OpenTask {
+    clientId: string;
+    clientName: string;
+    goal: string;
+}
+
 export interface Fachkraft {
     id: string;
     firstName: string;

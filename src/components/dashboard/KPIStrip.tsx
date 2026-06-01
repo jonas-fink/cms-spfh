@@ -5,6 +5,7 @@ interface KPIStripProps {
     totalClients: number;
     stundenValue: string;
     weekCounts: { durchgefuehrt: number; geplant: number };
+    openGoals: number;
 }
 
 const KPIStrip = ({
@@ -12,6 +13,7 @@ const KPIStrip = ({
     totalClients,
     stundenValue,
     weekCounts,
+    openGoals,
 }: KPIStripProps) => (
     <div
         className="grid gap-3.5"
@@ -32,7 +34,11 @@ const KPIStrip = ({
             value={String(weekCounts.geplant + weekCounts.durchgefuehrt)}
             sub={`${weekCounts.geplant} noch offen`}
         />
-        <KPICard label="Offene Aufgaben" value="–" sub="aus Hilfeplänen" />
+        <KPICard
+            label="Offene Aufgaben"
+            value={String(openGoals)}
+            sub="aus Hilfeplänen"
+        />
     </div>
 );
 

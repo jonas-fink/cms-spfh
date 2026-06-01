@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { api } from '../utils/api';
 import { getCurrentWeekDays, getISOWeek, isSameDay } from '../utils/format';
-import type { Client, Appointment } from '../types';
+import type { Client, Appointment, HilfePlan, OpenTask } from '../types';
 
 export interface UpcomingAppt extends Appointment {
     clientFamilyName: string;
@@ -10,6 +10,8 @@ export interface UpcomingAppt extends Appointment {
 interface DashboardData {
     clients: Client[];
     appointments: Record<string, Appointment[]>;
+    hilfeplans: Record<string, HilfePlan | null>;
+    openTasks: OpenTask[];
     upcomingAppts: UpcomingAppt[];
     minutesPerDay: number[];
     weekDays: Date[];
@@ -44,6 +46,9 @@ export function useDashboardData(): DashboardData {
     const [appointments, setAppointments] = useState<
         Record<string, Appointment[]>
     >({});
+    const [hilfeplans, setHilfeplans] = useState<
+        Record<string, HilfePlan | null>
+    >({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -66,22 +71,43 @@ export function useDashboardData(): DashboardData {
 
                 const rawClients = await api.get<Client[]>('/clients');
 
-                const apptResults = await Promise.all(
-                    rawClients.map((c) =>
-                        api
-                            .get<Appointment[]>(
-                                `/clients/${c.id}/appointments`,
-                            )
-                            .then((appts) => ({ clientId: c.id, appts }))
-                            .catch(() => ({ clientId: c.id, appts: [] })),
+                const [apptResults, planResults] = await Promise.all([
+                    Promise.all(
+                        rawClients.map((c) =>
+                            api
+                                .get<Appointment[]>(
+                                    `/clients/${c.id}/appointments`,
+                                )
+                                .then((appts) => ({ clientId: c.id, appts }))
+                                .catch(() => ({
+                                    clientId: c.id,
+                                    appts: [] as Appointment[],
+                                })),
+                        ),
                     ),
-                );
+                    Promise.all(
+                        rawClients.map((c) =>
+                            api
+                                .get<HilfePlan>(`/clients/${c.id}/hilfeplan`)
+                                .then((plan) => ({ clientId: c.id, plan }))
+                                .catch(() => ({
+                                    clientId: c.id,
+                                    plan: null as HilfePlan | null,
+                                })),
+                        ),
+                    ),
+                ]);
 
                 if (cancelled) return;
 
                 const apptMap: Record<string, Appointment[]> = {};
                 for (const { clientId, appts } of apptResults) {
                     apptMap[clientId] = appts;
+                }
+
+                const planMap: Record<string, HilfePlan | null> = {};
+                for (const { clientId, plan } of planResults) {
+                    planMap[clientId] = plan;
                 }
 
                 const enrichedClients: Client[] = rawClients.map((c) => {
@@ -116,6 +142,7 @@ export function useDashboardData(): DashboardData {
 
                 setClients(enrichedClients);
                 setAppointments(apptMap);
+                setHilfeplans(planMap);
             } catch (err: unknown) {
                 if (!cancelled)
                     setError((err as Error).message ?? 'Fehler beim Laden');
@@ -169,11 +196,25 @@ export function useDashboardData(): DashboardData {
                 clientFamilyName: clientMap.get(a.clientId)?.familyName ?? '–',
             }));
 
+        const openTasks: OpenTask[] = clients
+            .flatMap((c) => {
+                const plan = hilfeplans[c.id];
+                if (!plan) return [] as OpenTask[];
+                return plan.goals
+                    .filter((g) => g.status === 'offen')
+                    .map((g) => ({
+                        clientId: c.id,
+                        clientName: c.familyName,
+                        goal: g.goal,
+                    }));
+            })
+            .sort((a, b) => a.clientName.localeCompare(b.clientName, 'de'));
+
         const kpis = {
             activeClients: clients.filter((c) => c.status === 'aktiv').length,
             minutesThisWeek,
             apptsThisWeek: weekApptSet.length,
-            openGoals: 0,
+            openGoals: openTasks.length,
         };
 
         const weekCounts = {
@@ -181,12 +222,14 @@ export function useDashboardData(): DashboardData {
             geplant: geplant.length,
         };
 
-        return { upcomingAppts, minutesPerDay, kpis, weekCounts };
-    }, [clients, appointments, weekDays, weekDayKeys]);
+        return { upcomingAppts, minutesPerDay, kpis, weekCounts, openTasks };
+    }, [clients, appointments, hilfeplans, weekDays, weekDayKeys]);
 
     return {
         clients,
         appointments,
+        hilfeplans,
+        openTasks: derived.openTasks,
         upcomingAppts: derived.upcomingAppts,
         minutesPerDay: derived.minutesPerDay,
         weekDays,
