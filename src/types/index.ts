@@ -128,6 +128,7 @@ export interface ClientDoc {
     size: string;
     uploadedAt: string;
     description?: string;
+    downloadUrl?: string;
 }
 
 export interface VerlaufEntry {

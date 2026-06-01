@@ -71,6 +71,29 @@ export default function ClientDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    async function fetchDocs(clientId: string): Promise<ClientDoc[]> {
+        const docsRes = await api
+            .get<ApiDocument[]>(`/clients/${clientId}/documents`)
+            .catch(() => [] as ApiDocument[]);
+        return docsRes.map((d) => ({
+            id: (d.id ?? d._id)!,
+            clientId,
+            uploadedBy: d.uploadedBy,
+            fileName: d.fileName,
+            fileType: d.fileType,
+            size: formatFileSize(d.fileSizeBytes),
+            uploadedAt: d.createdAt,
+            description: d.description,
+            downloadUrl: d.downloadUrl,
+        }));
+    }
+
+    async function reloadDocs() {
+        if (!id) return;
+        const docs = await fetchDocs(id);
+        setDocuments(docs);
+    }
+
     useEffect(() => {
         if (!id) return;
         let cancelled = false;
@@ -80,17 +103,13 @@ export default function ClientDetailPage() {
                 setLoading(true);
                 setError(null);
 
-                const [clientRes, apptRes, docsRes, hilfeplanRes] =
+                const [clientRes, apptRes, normalizedDocs, hilfeplanRes] =
                     await Promise.all([
                         api.get<ApiClient>(`/clients/${clientId}`),
                         api.get<ApiAppointment[]>(
                             `/clients/${clientId}/appointments`,
                         ),
-                        api
-                            .get<
-                                ApiDocument[]
-                            >(`/clients/${clientId}/documents`)
-                            .catch(() => [] as ApiDocument[]),
+                        fetchDocs(clientId),
                         api
                             .get<HilfePlan>(`/clients/${clientId}/hilfeplan`)
                             .catch(() => null),
@@ -189,17 +208,6 @@ export default function ClientDetailPage() {
                     children: apiClient.children,
                     nextAppt,
                 };
-
-                const normalizedDocs: ClientDoc[] = docsRes.map((d) => ({
-                    id: (d.id ?? d._id)!,
-                    clientId,
-                    uploadedBy: d.uploadedBy,
-                    fileName: d.fileName,
-                    fileType: d.fileType,
-                    size: formatFileSize(d.fileSizeBytes),
-                    uploadedAt: d.createdAt,
-                    description: d.description,
-                }));
 
                 setClient(normalizedClient);
                 setAppointments(normalizedAppts);
@@ -338,7 +346,11 @@ export default function ClientDetailPage() {
                     />
                 )}
                 {activeTab === 'dokumente' && (
-                    <TabDokumente documents={documents} />
+                    <TabDokumente
+                        clientId={client.id}
+                        documents={documents}
+                        onChange={reloadDocs}
+                    />
                 )}
                 {activeTab === 'hilfeplan' && (
                     <TabHilfePlan hilfeplan={hilfeplan} />
