@@ -30,6 +30,7 @@ interface ApiClient {
 interface ApiWorkloadEntry {
     fachkraft: { id: string; name: string; email: string };
     clientCount: number;
+    maxClients: number;
     quotaMinutes: number;
     workedMinutes: number;
     performedMinutes: number;
@@ -39,8 +40,6 @@ interface ApiWorkloadEntry {
     appointmentsThisWeek: number;
     overdueReports: number;
 }
-
-const MAX_CLIENTS_PER_FK = 6;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -133,7 +132,7 @@ export default function AdminDashboard() {
                         name: w.fachkraft.name,
                         color: FK_COLORS[i % FK_COLORS.length],
                         activeClients: w.clientCount,
-                        maxClients: MAX_CLIENTS_PER_FK,
+                        maxClients: w.maxClients,
                         minutesThisWeek: w.workedMinutes,
                         quotaMinutesThisWeek: w.quotaMinutes,
                         appointmentsThisWeek: w.appointmentsThisWeek,

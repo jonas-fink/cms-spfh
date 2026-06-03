@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { Icon, Card, SectionHeader } from '../shared';
 import { formatDate } from '../../utils/format';
 import { api } from '../../utils/api';
@@ -30,14 +30,19 @@ interface UploadState {
     message?: string;
 }
 
-export function TabDokumente({
-    clientId,
-    documents,
-    onChange,
-}: TabDokumenteProps) {
+export interface TabDokumenteHandle {
+    openPicker: () => void;
+}
+
+export const TabDokumente = forwardRef<TabDokumenteHandle, TabDokumenteProps>(
+    function TabDokumente({ clientId, documents, onChange }, ref) {
     const [isDragging, setIsDragging] = useState(false);
     const [uploads, setUploads] = useState<UploadState[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    useImperativeHandle(ref, () => ({
+        openPicker: () => inputRef.current?.click(),
+    }));
 
     async function uploadOne(file: File) {
         const fileType = getFileType(file);
@@ -64,10 +69,7 @@ export function TabDokumente({
             return;
         }
 
-        setUploads((u) => [
-            ...u,
-            { fileName: file.name, status: 'uploading' },
-        ]);
+        setUploads((u) => [...u, { fileName: file.name, status: 'uploading' }]);
 
         try {
             const { presignedUrl, documentId } = await api.post<{
@@ -85,7 +87,8 @@ export function TabDokumente({
                 headers: { 'Content-Type': CONTENT_TYPES[fileType] },
                 body: file,
             });
-            if (!putRes.ok) throw new Error(`S3-Upload fehlgeschlagen (${putRes.status})`);
+            if (!putRes.ok)
+                throw new Error(`S3-Upload fehlgeschlagen (${putRes.status})`);
 
             await api.patch(`/documents/${documentId}/confirm`);
 
@@ -138,7 +141,7 @@ export function TabDokumente({
                 onClick={() => inputRef.current?.click()}
                 className={`border-2 border-dashed rounded-[10px] p-7 text-center cursor-pointer transition-all duration-150 ${
                     isDragging
-                        ? 'border-accent bg-accent/[0.04]'
+                        ? 'border-accent bg-accent/4'
                         : 'border-border-strong bg-surface'
                 }`}
             >
@@ -195,7 +198,11 @@ export function TabDokumente({
                                             )
                                         }
                                     >
-                                        <Icon name="x" size={14} stroke={1.75} />
+                                        <Icon
+                                            name="x"
+                                            size={14}
+                                            stroke={1.75}
+                                        />
                                     </button>
                                 </>
                             )}
@@ -260,7 +267,8 @@ export function TabDokumente({
                                     rel="noopener noreferrer"
                                     aria-disabled={!doc.downloadUrl}
                                     onClick={(e) => {
-                                        if (!doc.downloadUrl) e.preventDefault();
+                                        if (!doc.downloadUrl)
+                                            e.preventDefault();
                                     }}
                                     className={`bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100 ${!doc.downloadUrl ? 'opacity-40 pointer-events-none' : ''}`}
                                 >
@@ -287,4 +295,4 @@ export function TabDokumente({
             </Card>
         </div>
     );
-}
+});

@@ -20,6 +20,7 @@ export interface Client {
     familyName: string;
     caseNumber: string;
     address?: string;
+    phone?: string;
     jugendamtContact?: string;
     assignedFachkraefte: string[];
     weeklyHoursQuota: number;
@@ -99,6 +100,7 @@ export interface AuthUser {
     lastName: string;
     email: string;
     role: 'fachkraft' | 'admin';
+    maxClients?: number;
 }
 
 // API Response Wrapper

@@ -8,6 +8,7 @@ interface TabTermineProps {
     filter: ApptFilter;
     onFilterChange: (f: ApptFilter) => void;
     fkMap: FKMap;
+    onNewAppointment: () => void;
 }
 
 const FILTER_LABELS: Record<ApptFilter, string> = {
@@ -22,6 +23,7 @@ export function TabTermine({
     filter,
     onFilterChange,
     fkMap,
+    onNewAppointment,
 }: TabTermineProps) {
     const filtered =
         filter === 'alle'
@@ -43,7 +45,12 @@ export function TabTermine({
                     />
                 ))}
                 <div className="flex-1" />
-                <Button variant="primary" size="sm" icon="plus">
+                <Button
+                    variant="primary"
+                    size="sm"
+                    icon="plus"
+                    onClick={onNewAppointment}
+                >
                     Neuer Termin
                 </Button>
             </div>

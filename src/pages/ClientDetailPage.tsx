@@ -1,13 +1,15 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'react-router';
 import {
     ClientDetailHeader,
     TabUebersicht,
     TabVerlauf,
 } from '../components/client';
-import { TabTermine } from '../components/appointment';
+import { TabTermine, AppointmentForm } from '../components/appointment';
 import { TabDokumente } from '../components/document';
+import type { TabDokumenteHandle } from '../components/document/TabDokumente';
 import { TabHilfePlan } from '../components/hilfeplan';
+import { Modal } from '../components/shared';
 import { api } from '../utils/api';
 import {
     getCurrentWeekDays,
@@ -33,6 +35,7 @@ interface ApiClient extends Omit<
     'assignedFachkraefte' | 'minutesThisWeek' | 'nextAppt'
 > {
     _id: string;
+    phone?: string;
     assignedFachkraefte: PopulatedUser[];
 }
 
@@ -70,6 +73,8 @@ export default function ClientDetailPage() {
     const [apptFilter, setApptFilter] = useState<ApptFilter>('alle');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [apptModalOpen, setApptModalOpen] = useState(false);
+    const docsRef = useRef<TabDokumenteHandle>(null);
 
     async function fetchDocs(clientId: string): Promise<ClientDoc[]> {
         const docsRes = await api
@@ -92,6 +97,90 @@ export default function ClientDetailPage() {
         if (!id) return;
         const docs = await fetchDocs(id);
         setDocuments(docs);
+    }
+
+    async function reloadAppts() {
+        if (!id) return;
+        const apiAppointments = await api.get<ApiAppointment[]>(
+            `/clients/${id}/appointments`,
+        );
+
+        // FKMap evtl. um neue Creators erweitern
+        setFkMap((prev) => {
+            const next = { ...prev };
+            let colorIdx = Object.keys(next).length;
+            for (const a of apiAppointments) {
+                if (typeof a.createdBy !== 'string') {
+                    const uid = a.createdBy.id ?? a.createdBy._id;
+                    if (!next[uid]) {
+                        next[uid] = {
+                            name: `${a.createdBy.firstName} ${a.createdBy.lastName}`,
+                            color: pickFkColor(colorIdx++),
+                        };
+                    }
+                }
+            }
+            return next;
+        });
+
+        const normalizedAppts: Appointment[] = apiAppointments.map((a) => ({
+            id: a.id ?? a._id,
+            clientId: a.clientId,
+            createdBy: userId(a.createdBy),
+            type: a.type,
+            status: a.status,
+            date: a.date,
+            durationHours: a.durationHours,
+            durationMinutes: a.durationMinutes,
+            report: a.report,
+        }));
+        setAppointments(normalizedAppts);
+
+        const weekKeys = new Set(
+            getCurrentWeekDays().map((d) => d.toISOString().slice(0, 10)),
+        );
+        const minutesThisWeek = normalizedAppts
+            .filter(
+                (a) =>
+                    a.status === 'durchgeführt' &&
+                    weekKeys.has(a.date.slice(0, 10)),
+            )
+            .reduce(
+                (sum, a) => sum + a.durationHours * 60 + a.durationMinutes,
+                0,
+            );
+        const now = new Date();
+        const upcoming = normalizedAppts
+            .filter((a) => a.status === 'geplant' && new Date(a.date) >= now)
+            .sort(
+                (a, b) =>
+                    new Date(a.date).getTime() - new Date(b.date).getTime(),
+            );
+        const nextAppt = upcoming[0]
+            ? { date: upcoming[0].date, type: upcoming[0].type }
+            : null;
+
+        setClient((c) =>
+            c ? { ...c, minutesThisWeek, nextAppt } : c,
+        );
+    }
+
+    function handleCall() {
+        if (client?.phone) window.location.href = `tel:${client.phone}`;
+    }
+
+    function handleUpload() {
+        setActiveTab('dokumente');
+        setTimeout(() => docsRef.current?.openPicker(), 0);
+    }
+
+    function handleNewAppointment() {
+        setApptModalOpen(true);
+    }
+
+    async function handleApptSaved() {
+        setApptModalOpen(false);
+        await reloadAppts();
     }
 
     useEffect(() => {
@@ -197,6 +286,7 @@ export default function ClientDetailPage() {
                     familyName: apiClient.familyName,
                     caseNumber: apiClient.caseNumber,
                     address: apiClient.address,
+                    phone: apiClient.phone,
                     jugendamtContact: apiClient.jugendamtContact,
                     assignedFachkraefte: apiClient.assignedFachkraefte.map(
                         (u) => u.id ?? u._id,
@@ -326,6 +416,9 @@ export default function ClientDetailPage() {
                 activeTab={activeTab}
                 tabs={tabs}
                 onTabChange={setActiveTab}
+                onCall={handleCall}
+                onUpload={handleUpload}
+                onNewAppointment={handleNewAppointment}
             />
 
             <div className="px-8 pt-6 pb-16 max-w-7xl mx-auto">
@@ -343,10 +436,12 @@ export default function ClientDetailPage() {
                         filter={apptFilter}
                         onFilterChange={setApptFilter}
                         fkMap={fkMap}
+                        onNewAppointment={handleNewAppointment}
                     />
                 )}
                 {activeTab === 'dokumente' && (
                     <TabDokumente
+                        ref={docsRef}
                         clientId={client.id}
                         documents={documents}
                         onChange={reloadDocs}
@@ -357,6 +452,19 @@ export default function ClientDetailPage() {
                 )}
                 {activeTab === 'verlauf' && <TabVerlauf verlauf={verlauf} />}
             </div>
+
+            <Modal
+                open={apptModalOpen}
+                onClose={() => setApptModalOpen(false)}
+                title="Neuer Termin"
+            >
+                <AppointmentForm
+                    clientId={client.id}
+                    mode="create"
+                    onSuccess={handleApptSaved}
+                    onCancel={() => setApptModalOpen(false)}
+                />
+            </Modal>
         </div>
     );
 }

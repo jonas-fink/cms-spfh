@@ -15,3 +15,4 @@ export { default as GoalCheck } from './GoalCheck';
 export { TabBtn } from './TabBtn';
 export { FilterBtn } from './FilterBtn';
 export { default as ErrorBoundary } from './ErrorBoundary';
+export { default as Modal } from './Modal';

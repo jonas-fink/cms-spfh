@@ -9,6 +9,9 @@ interface ClientDetailHeaderProps {
     activeTab: ActiveTab;
     tabs: { key: ActiveTab; label: string; count?: number }[];
     onTabChange: (tab: ActiveTab) => void;
+    onCall: () => void;
+    onUpload: () => void;
+    onNewAppointment: () => void;
 }
 
 export function ClientDetailHeader({
@@ -17,6 +20,9 @@ export function ClientDetailHeader({
     activeTab,
     tabs,
     onTabChange,
+    onCall,
+    onUpload,
+    onNewAppointment,
 }: ClientDetailHeaderProps) {
     const navigate = useNavigate();
     const isTandem = client.assignedFachkraefte.length > 1;
@@ -64,13 +70,34 @@ export function ClientDetailHeader({
                     seit {formatDate(client.startDate, { dateOnly: true })}
                 </span>
                 <div className="ml-auto flex items-center gap-2">
-                    <Button variant="secondary" size="sm" icon="phone">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        icon="phone"
+                        onClick={onCall}
+                        disabled={!client.phone}
+                        title={
+                            client.phone
+                                ? `Anrufen: ${client.phone}`
+                                : 'Telefonnummer nicht erfasst'
+                        }
+                    >
                         Anrufen
                     </Button>
-                    <Button variant="secondary" size="sm" icon="file">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        icon="file"
+                        onClick={onUpload}
+                    >
                         Dokument
                     </Button>
-                    <Button variant="primary" size="sm" icon="plus">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        icon="plus"
+                        onClick={onNewAppointment}
+                    >
                         Neuer Termin
                     </Button>
                     <button className="w-[30px] h-[30px] rounded-[7px] border border-border bg-surface flex items-center justify-center cursor-pointer text-muted hover:bg-surface-hover transition-colors duration-100">

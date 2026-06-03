@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# SPFH CMS – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React-Frontend für das **SPFH-Dokumentationssystem** (Sozialpädagogische Familienhilfe).
+Fachkräfte sehen ihre zugewiesenen Familien, tragen Termine ein und laden Berichte hoch;
+Admins behalten die Auslastung aller Fachkräfte im Blick.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19 + TypeScript**
+- **Vite** als Dev/Build-Tool
+- **React Router v7** (`createBrowserRouter`)
+- **Tailwind v4** mit eigenen Design-Tokens (`@theme inline` in `index.css`)
+- **fetch-Wrapper** (`utils/api.ts`) mit automatischem Access-Token-Refresh und Retry
 
-## React Compiler
+## Struktur
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Pages sind reine Orchestratoren — die eigentliche UI sitzt in granularen
+Komponenten unter `/components/<domain>`:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+  pages/         LoginPage, FKDashboard, ClientDetailPage, AdminDashboardPage
+  layouts/       AppLayout (Fachkraft), AdminLayout
+  components/
+    shared/      Button, Card, Icon, KPICard, HoursRing, Modal, …
+    dashboard/   KPIStrip, ClientsGrid, WeeklyChart, UpcomingAppointmentsRail, …
+    client/      ClientCard, ClientDetailHeader, TabUebersicht, TabVerlauf
+    appointment/ TabTermine, AppointmentForm
+    document/    TabDokumente (Drag&Drop-Upload mit S3 Presigned URLs)
+    hilfeplan/   TabHilfePlan
+    admin/       WorkloadTable, ClientDistribution, AlertsPanel
+  context/       AuthContext + useAuth-Hook
+  hooks/         useDashboardData
+  types/         Single Source of Truth für alle Frontend-Typen
+  utils/         api, format, colors
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Wichtige Patterns
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Auth**: Access-Token im Memory, Refresh-Token als httpOnly-Cookie. Bei 401 wird
+  einmal transparent refreshed; schlägt das fehl, wird ein `auth:logout`-Event gefeuert.
+- **API-Calls**: `api.get<T>(path)` liefert direkt den Payload (der Wrapper stripped
+  `{ data: … }` einmalig).
+- **Dark Mode**: über `[data-theme="dark"]` auf dem Root-Element.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Lokal starten
+
+Backend muss parallel auf `http://localhost:8080` laufen (siehe `cms-backend/`).
+Die Vite-Konfig proxyt `/api` automatisch dorthin.
+
+```bash
+npm install
+npm run dev
 ```
+
+Login (Seed): `admin@spfh.de` / `admin1234` oder `a.berger@spfh.de` / `fk12345`.
