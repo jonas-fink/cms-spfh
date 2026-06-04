@@ -7,6 +7,7 @@ import FKDashboard from './pages/FKDashboard';
 import ClientDetailPage from './pages/ClientDetailPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminClientsPage from './pages/AdminClientsPage';
+import AdminFachkraefteListPage from './pages/AdminFachkraefteListPage';
 
 export const router = createBrowserRouter([
     {
@@ -45,7 +46,7 @@ export const router = createBrowserRouter([
                     { path: '/admin', element: <AdminDashboardPage /> },
                     {
                         path: '/admin/fachkraefte',
-                        element: <div>Fachkräfte (Placeholder)</div>,
+                        element: <AdminFachkraefteListPage />,
                     },
                     {
                         path: '/admin/clients',

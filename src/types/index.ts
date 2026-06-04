@@ -80,6 +80,10 @@ export interface Fachkraft {
     lastName: string;
     email: string;
     role: 'fachkraft' | 'admin';
+    maxClients?: number;
+    weeklyTargetMinutes?: number;
+    vacationDaysPerYear?: number;
+    overtimeMinutes?: number;
 }
 
 // Backend-Shapes (populated Responses)
@@ -101,6 +105,9 @@ export interface AuthUser {
     email: string;
     role: 'fachkraft' | 'admin';
     maxClients?: number;
+    weeklyTargetMinutes?: number;
+    vacationDaysPerYear?: number;
+    overtimeMinutes?: number;
 }
 
 // API Response Wrapper
