@@ -293,7 +293,7 @@ export default function AdminDashboard() {
                 <ClientDistribution
                     clients={clients}
                     fachkraefte={fachkraefte}
-                    onClientClick={(id) => navigate(`/clients/${id}`)}
+                    onClientClick={(id) => navigate(`/admin/clients/${id}`)}
                 />
 
                 {/* Alerts */}

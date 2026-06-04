@@ -8,6 +8,7 @@ interface TabDokumenteProps {
     clientId: string;
     documents: ClientDoc[];
     onChange: () => void | Promise<void>;
+    readOnly?: boolean;
 }
 
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -35,7 +36,7 @@ export interface TabDokumenteHandle {
 }
 
 export const TabDokumente = forwardRef<TabDokumenteHandle, TabDokumenteProps>(
-    function TabDokumente({ clientId, documents, onChange }, ref) {
+    function TabDokumente({ clientId, documents, onChange, readOnly = false }, ref) {
     const [isDragging, setIsDragging] = useState(false);
     const [uploads, setUploads] = useState<UploadState[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -127,6 +128,7 @@ export const TabDokumente = forwardRef<TabDokumenteHandle, TabDokumenteProps>(
     return (
         <div className="flex flex-col gap-4">
             {/* Upload-Zone */}
+            {!readOnly && (
             <div
                 onDragOver={(e) => {
                     e.preventDefault();
@@ -171,6 +173,7 @@ export const TabDokumente = forwardRef<TabDokumenteHandle, TabDokumenteProps>(
                 </p>
                 <p className="text-xs text-muted">PDF oder DOCX · max. 10 MB</p>
             </div>
+            )}
 
             {/* Upload-Status */}
             {uploads.length > 0 && (
@@ -278,16 +281,18 @@ export const TabDokumente = forwardRef<TabDokumenteHandle, TabDokumenteProps>(
                                         stroke={1.75}
                                     />
                                 </a>
-                                <button
-                                    onClick={() => handleDelete(doc.id)}
-                                    className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100"
-                                >
-                                    <Icon
-                                        name="trash"
-                                        size={15}
-                                        stroke={1.75}
-                                    />
-                                </button>
+                                {!readOnly && (
+                                    <button
+                                        onClick={() => handleDelete(doc.id)}
+                                        className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100"
+                                    >
+                                        <Icon
+                                            name="trash"
+                                            size={15}
+                                            stroke={1.75}
+                                        />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))

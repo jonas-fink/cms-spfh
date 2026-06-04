@@ -9,9 +9,10 @@ interface ClientDetailHeaderProps {
     activeTab: ActiveTab;
     tabs: { key: ActiveTab; label: string; count?: number }[];
     onTabChange: (tab: ActiveTab) => void;
-    onCall: () => void;
-    onUpload: () => void;
-    onNewAppointment: () => void;
+    mode?: 'fk' | 'admin';
+    onCall?: () => void;
+    onUpload?: () => void;
+    onNewAppointment?: () => void;
 }
 
 export function ClientDetailHeader({
@@ -20,11 +21,14 @@ export function ClientDetailHeader({
     activeTab,
     tabs,
     onTabChange,
+    mode = 'fk',
     onCall,
     onUpload,
     onNewAppointment,
 }: ClientDetailHeaderProps) {
     const navigate = useNavigate();
+    const backTo = mode === 'admin' ? '/admin/clients' : '/clients';
+    const backLabel = mode === 'admin' ? 'Alle Klienten (Admin)' : 'Alle Klienten';
     const isTandem = client.assignedFachkraefte.length > 1;
     const minutesH = Math.floor(client.minutesThisWeek / 60);
     const minutesM = client.minutesThisWeek % 60;
@@ -33,11 +37,11 @@ export function ClientDetailHeader({
         <div className="sticky top-0 z-10 bg-bg border-b border-border px-8 pt-4">
             {/* Zurück */}
             <button
-                onClick={() => navigate('/clients')}
+                onClick={() => navigate(backTo)}
                 className="flex items-center gap-1 bg-transparent border-none cursor-pointer text-muted text-[12.5px] mb-2.5 p-0"
             >
                 <Icon name="chevronLeft" size={14} stroke={2} />
-                Alle Klienten
+                {backLabel}
             </button>
 
             {/* Titel + Badges */}
@@ -69,41 +73,50 @@ export function ClientDetailHeader({
                     <Icon name="clock" size={13} stroke={1.75} />
                     seit {formatDate(client.startDate, { dateOnly: true })}
                 </span>
-                <div className="ml-auto flex items-center gap-2">
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        icon="phone"
-                        onClick={onCall}
-                        disabled={!client.phone}
-                        title={
-                            client.phone
-                                ? `Anrufen: ${client.phone}`
-                                : 'Telefonnummer nicht erfasst'
-                        }
-                    >
-                        Anrufen
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        icon="file"
-                        onClick={onUpload}
-                    >
-                        Dokument
-                    </Button>
-                    <Button
-                        variant="primary"
-                        size="sm"
-                        icon="plus"
-                        onClick={onNewAppointment}
-                    >
-                        Neuer Termin
-                    </Button>
-                    <button className="w-[30px] h-[30px] rounded-[7px] border border-border bg-surface flex items-center justify-center cursor-pointer text-muted hover:bg-surface-hover transition-colors duration-100">
-                        <Icon name="moreH" size={15} stroke={1.75} />
-                    </button>
-                </div>
+                {mode === 'fk' && (
+                    <div className="ml-auto flex items-center gap-2">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon="phone"
+                            onClick={onCall}
+                            disabled={!client.phone}
+                            title={
+                                client.phone
+                                    ? `Anrufen: ${client.phone}`
+                                    : 'Telefonnummer nicht erfasst'
+                            }
+                        >
+                            Anrufen
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon="file"
+                            onClick={onUpload}
+                        >
+                            Dokument
+                        </Button>
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            icon="plus"
+                            onClick={onNewAppointment}
+                        >
+                            Neuer Termin
+                        </Button>
+                        <button className="w-[30px] h-[30px] rounded-[7px] border border-border bg-surface flex items-center justify-center cursor-pointer text-muted hover:bg-surface-hover transition-colors duration-100">
+                            <Icon name="moreH" size={15} stroke={1.75} />
+                        </button>
+                    </div>
+                )}
+                {mode === 'admin' && (
+                    <div className="ml-auto flex items-center gap-2">
+                        <span className="text-[11.5px] font-medium bg-amber-500/12 text-amber-700 px-2 py-0.5 rounded-[5px]">
+                            Admin-Ansicht
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* Quick-Stats Strip */}

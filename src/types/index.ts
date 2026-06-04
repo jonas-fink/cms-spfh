@@ -117,7 +117,8 @@ export type ActiveTab =
     | 'termine'
     | 'dokumente'
     | 'hilfeplan'
-    | 'verlauf';
+    | 'verlauf'
+    | 'verwaltung';
 
 export type ApptFilter = 'alle' | 'geplant' | 'durchgeführt' | 'ausgefallen';
 

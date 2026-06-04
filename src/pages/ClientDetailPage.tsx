@@ -9,6 +9,7 @@ import { TabTermine, AppointmentForm } from '../components/appointment';
 import { TabDokumente } from '../components/document';
 import type { TabDokumenteHandle } from '../components/document/TabDokumente';
 import { TabHilfePlan } from '../components/hilfeplan';
+import { AdminClientEdit } from '../components/admin';
 import { Modal } from '../components/shared';
 import { api } from '../utils/api';
 import {
@@ -61,8 +62,13 @@ interface ApiDocument {
     downloadUrl?: string;
 }
 
-export default function ClientDetailPage() {
+interface ClientDetailPageProps {
+    mode?: 'fk' | 'admin';
+}
+
+export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps = {}) {
     const { id } = useParams<{ id: string }>();
+    const isAdmin = mode === 'admin';
 
     const [client, setClient] = useState<Client | null>(null);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -74,6 +80,7 @@ export default function ClientDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [apptModalOpen, setApptModalOpen] = useState(false);
+    const [reloadKey, setReloadKey] = useState(0);
     const docsRef = useRef<TabDokumenteHandle>(null);
 
     async function fetchDocs(clientId: string): Promise<ClientDoc[]> {
@@ -319,7 +326,7 @@ export default function ClientDetailPage() {
         return () => {
             cancelled = true;
         };
-    }, [id]);
+    }, [id, reloadKey]);
 
     // Verlauf aus echten Daten ableiten (Termine + Dokumente + HilfePlan)
     const verlauf = useMemo<VerlaufEntry[]>(() => {
@@ -406,6 +413,9 @@ export default function ClientDetailPage() {
             count: hilfeplan?.goals.length,
         },
         { key: 'verlauf', label: 'Verlauf' },
+        ...(isAdmin
+            ? [{ key: 'verwaltung' as ActiveTab, label: 'Verwaltung' }]
+            : []),
     ];
 
     return (
@@ -416,6 +426,7 @@ export default function ClientDetailPage() {
                 activeTab={activeTab}
                 tabs={tabs}
                 onTabChange={setActiveTab}
+                mode={mode}
                 onCall={handleCall}
                 onUpload={handleUpload}
                 onNewAppointment={handleNewAppointment}
@@ -436,7 +447,10 @@ export default function ClientDetailPage() {
                         filter={apptFilter}
                         onFilterChange={setApptFilter}
                         fkMap={fkMap}
-                        onNewAppointment={handleNewAppointment}
+                        onNewAppointment={
+                            isAdmin ? undefined : handleNewAppointment
+                        }
+                        readOnly={isAdmin}
                     />
                 )}
                 {activeTab === 'dokumente' && (
@@ -445,12 +459,19 @@ export default function ClientDetailPage() {
                         clientId={client.id}
                         documents={documents}
                         onChange={reloadDocs}
+                        readOnly={isAdmin}
                     />
                 )}
                 {activeTab === 'hilfeplan' && (
                     <TabHilfePlan hilfeplan={hilfeplan} />
                 )}
                 {activeTab === 'verlauf' && <TabVerlauf verlauf={verlauf} />}
+                {activeTab === 'verwaltung' && isAdmin && (
+                    <AdminClientEdit
+                        client={client}
+                        onChange={() => setReloadKey((k) => k + 1)}
+                    />
+                )}
             </div>
 
             <Modal

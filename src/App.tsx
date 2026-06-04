@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import FKDashboard from './pages/FKDashboard';
 import ClientDetailPage from './pages/ClientDetailPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminClientsPage from './pages/AdminClientsPage';
 
 export const router = createBrowserRouter([
     {
@@ -48,7 +49,11 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: '/admin/clients',
-                        element: <div>Klienten (Placeholder)</div>,
+                        element: <AdminClientsPage />,
+                    },
+                    {
+                        path: '/admin/clients/:id',
+                        element: <ClientDetailPage mode="admin" />,
                     },
                     {
                         path: '/admin/stats',

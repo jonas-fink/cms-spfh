@@ -4,3 +4,4 @@ export {
 } from './WorkloadTable';
 export { default as ClientDistribution } from './ClientDistribution';
 export { default as AlertsPanel, type AdminAlert } from './AlertsPanel';
+export { default as AdminClientEdit } from './AdminClientEdit';

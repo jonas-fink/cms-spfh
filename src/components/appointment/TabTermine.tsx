@@ -8,7 +8,8 @@ interface TabTermineProps {
     filter: ApptFilter;
     onFilterChange: (f: ApptFilter) => void;
     fkMap: FKMap;
-    onNewAppointment: () => void;
+    onNewAppointment?: () => void;
+    readOnly?: boolean;
 }
 
 const FILTER_LABELS: Record<ApptFilter, string> = {
@@ -24,6 +25,7 @@ export function TabTermine({
     onFilterChange,
     fkMap,
     onNewAppointment,
+    readOnly = false,
 }: TabTermineProps) {
     const filtered =
         filter === 'alle'
@@ -45,14 +47,16 @@ export function TabTermine({
                     />
                 ))}
                 <div className="flex-1" />
-                <Button
-                    variant="primary"
-                    size="sm"
-                    icon="plus"
-                    onClick={onNewAppointment}
-                >
-                    Neuer Termin
-                </Button>
+                {!readOnly && onNewAppointment && (
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        icon="plus"
+                        onClick={onNewAppointment}
+                    >
+                        Neuer Termin
+                    </Button>
+                )}
             </div>
 
             <Card>
@@ -150,22 +154,24 @@ export function TabTermine({
                                             )}
                                         </td>
                                         <td className="px-3 py-3">
-                                            <div className="flex gap-0.5">
-                                                <button className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100">
-                                                    <Icon
-                                                        name="edit"
-                                                        size={14}
-                                                        stroke={1.75}
-                                                    />
-                                                </button>
-                                                <button className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100">
-                                                    <Icon
-                                                        name="trash"
-                                                        size={14}
-                                                        stroke={1.75}
-                                                    />
-                                                </button>
-                                            </div>
+                                            {!readOnly && (
+                                                <div className="flex gap-0.5">
+                                                    <button className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100">
+                                                        <Icon
+                                                            name="edit"
+                                                            size={14}
+                                                            stroke={1.75}
+                                                        />
+                                                    </button>
+                                                    <button className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100">
+                                                        <Icon
+                                                            name="trash"
+                                                            size={14}
+                                                            stroke={1.75}
+                                                        />
+                                                    </button>
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 );
