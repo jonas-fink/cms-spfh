@@ -8,6 +8,11 @@ import ClientDetailPage from './pages/ClientDetailPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminClientsPage from './pages/AdminClientsPage';
 import AdminFachkraefteListPage from './pages/AdminFachkraefteListPage';
+import AdminStatsPage from './pages/AdminStatsPage';
+import AdminDocumentsPage from './pages/AdminDocumentsPage';
+import ClientsListPage from './pages/ClientsListPage';
+import CalendarPage from './pages/CalendarPage';
+import DocumentsPage from './pages/DocumentsPage';
 
 export const router = createBrowserRouter([
     {
@@ -25,19 +30,10 @@ export const router = createBrowserRouter([
                         element: <Navigate to="/dashboard" replace />,
                     },
                     { path: '/dashboard', element: <FKDashboard /> },
-                    {
-                        path: '/clients',
-                        element: <div>Klienten (Placeholder)</div>,
-                    },
+                    { path: '/clients', element: <ClientsListPage /> },
                     { path: '/clients/:id', element: <ClientDetailPage /> },
-                    {
-                        path: '/calendar',
-                        element: <div>Kalender (Placeholder)</div>,
-                    },
-                    {
-                        path: '/documents',
-                        element: <div>Dokumente (Placeholder)</div>,
-                    },
+                    { path: '/calendar', element: <CalendarPage /> },
+                    { path: '/documents', element: <DocumentsPage /> },
                 ],
             },
             {
@@ -56,13 +52,10 @@ export const router = createBrowserRouter([
                         path: '/admin/clients/:id',
                         element: <ClientDetailPage mode="admin" />,
                     },
-                    {
-                        path: '/admin/stats',
-                        element: <div>Auslastung (Placeholder)</div>,
-                    },
+                    { path: '/admin/stats', element: <AdminStatsPage /> },
                     {
                         path: '/admin/documents',
-                        element: <div>Dokumente (Placeholder)</div>,
+                        element: <AdminDocumentsPage />,
                     },
                 ],
             },

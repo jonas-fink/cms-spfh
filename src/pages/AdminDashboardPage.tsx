@@ -11,35 +11,12 @@ import {
 import { api } from '../utils/api';
 import { FK_COLORS } from '../utils/colors';
 import { getISOWeek } from '../utils/format';
-import type { Client, Fachkraft, PopulatedUser } from '../types';
-
-// ─── Backend-Shapes ──────────────────────────────────────────────────────────
-
-interface ApiClient {
-    _id: string;
-    id?: string;
-    familyName: string;
-    caseNumber?: string;
-    assignedFachkraefte: PopulatedUser[];
-    weeklyHoursQuota: number;
-    status: 'aktiv' | 'pausiert' | 'abgeschlossen';
-    startDate: string;
-    children: { name: string; age: number }[];
-}
-
-interface ApiWorkloadEntry {
-    fachkraft: { id: string; name: string; email: string };
-    clientCount: number;
-    maxClients: number;
-    quotaMinutes: number;
-    workedMinutes: number;
-    performedMinutes: number;
-    cancelledCreditedCount: number;
-    cancelledCreditMinutes: number;
-    utilizationPercent: number;
-    appointmentsThisWeek: number;
-    overdueReports: number;
-}
+import type {
+    ApiClient,
+    ApiWorkloadEntry,
+    Client,
+    Fachkraft,
+} from '../types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

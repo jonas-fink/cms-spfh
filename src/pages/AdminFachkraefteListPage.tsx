@@ -10,7 +10,7 @@ import {
 import { FachkraftForm } from '../components/admin';
 import { FK_COLORS } from '../utils/colors';
 import { api } from '../utils/api';
-import type { Fachkraft } from '../types';
+import type { ApiWorkloadEntry, Fachkraft } from '../types';
 
 interface ApiUser {
     _id: string;
@@ -23,12 +23,6 @@ interface ApiUser {
     weeklyTargetMinutes?: number;
     vacationDaysPerYear?: number;
     overtimeMinutes?: number;
-}
-
-interface ApiWorkloadEntry {
-    fachkraft: { id: string; name: string; email: string };
-    clientCount: number;
-    maxClients: number;
 }
 
 interface EnrichedFK extends Fachkraft {

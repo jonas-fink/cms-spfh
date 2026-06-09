@@ -115,6 +115,40 @@ export interface ApiResponse<T> {
     data: T;
 }
 
+// API-Shapes (populated, mehrfach genutzt)
+
+export interface ApiClient {
+    _id: string;
+    id?: string;
+    familyName: string;
+    caseNumber: string;
+    assignedFachkraefte: PopulatedUser[];
+    weeklyHoursQuota: number;
+    status: ClientStatus;
+    startDate: string;
+    children: { name: string; age: number }[];
+}
+
+export interface ApiClientHours {
+    totalMinutes: number;
+    quotaMinutes: number;
+    progressPercent: number;
+}
+
+export interface ApiWorkloadEntry {
+    fachkraft: { id: string; name: string; email: string };
+    clientCount: number;
+    maxClients: number;
+    quotaMinutes: number;
+    workedMinutes: number;
+    performedMinutes: number;
+    cancelledCreditedCount: number;
+    cancelledCreditMinutes: number;
+    utilizationPercent: number;
+    appointmentsThisWeek: number;
+    overdueReports: number;
+}
+
 // Client Details
 
 export type FKMap = Record<string, { name: string; color: string }>;

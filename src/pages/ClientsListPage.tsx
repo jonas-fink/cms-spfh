@@ -3,17 +3,16 @@ import { useNavigate } from 'react-router';
 import {
     Avatar,
     Card,
+    FilterBtn,
     SectionHeader,
     StatusPill,
     UtilBar,
-    FilterBtn,
 } from '../components/shared';
 import { api } from '../utils/api';
 import { pickFkColor } from '../utils/colors';
 import type {
     ApiClient,
     ApiClientHours,
-    Client,
     ClientStatus,
     PopulatedUser,
 } from '../types';
@@ -27,21 +26,20 @@ const STATUS_FILTERS: StatusFilter[] = [
     'abgeschlossen',
 ];
 
-function utilPercent(minutes: number, quota: number): number {
-    if (quota === 0) return 0;
-    return Math.round((minutes / quota) * 100);
+interface Row {
+    id: string;
+    familyName: string;
+    caseNumber: string;
+    weeklyHoursQuota: number;
+    minutesThisWeek: number;
+    status: ClientStatus;
+    children: { name: string; age: number }[];
+    fkDetails: PopulatedUser[];
 }
 
-export default function AdminClientsPage() {
+export default function ClientsListPage() {
     const navigate = useNavigate();
-    const [clients, setClients] = useState<
-        Array<
-            Client & {
-                minutesThisWeek: number;
-                _fkDetails: PopulatedUser[];
-            }
-        >
-    >([]);
+    const [rows, setRows] = useState<Row[]>([]);
     const [filter, setFilter] = useState<StatusFilter>('alle');
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
@@ -49,7 +47,6 @@ export default function AdminClientsPage() {
 
     useEffect(() => {
         let cancelled = false;
-
         async function load() {
             try {
                 setLoading(true);
@@ -57,7 +54,6 @@ export default function AdminClientsPage() {
                 const apiClients = await api.get<ApiClient[]>('/clients');
                 if (cancelled) return;
 
-                // Stunden pro Klient parallel laden (Workload-Endpoint pro Klient)
                 const hoursList = await Promise.all(
                     apiClients.map((c) =>
                         api
@@ -73,21 +69,17 @@ export default function AdminClientsPage() {
                 );
                 if (cancelled) return;
 
-                const mapped = apiClients.map((c, i) => ({
+                const mapped: Row[] = apiClients.map((c, i) => ({
                     id: c.id ?? c._id,
                     familyName: c.familyName,
                     caseNumber: c.caseNumber,
-                    assignedFachkraefte: c.assignedFachkraefte.map(
-                        (u) => u.id ?? u._id,
-                    ),
                     weeklyHoursQuota: c.weeklyHoursQuota,
                     minutesThisWeek: hoursList[i].totalMinutes,
                     status: c.status,
-                    startDate: c.startDate,
                     children: c.children,
-                    _fkDetails: c.assignedFachkraefte,
+                    fkDetails: c.assignedFachkraefte,
                 }));
-                setClients(mapped);
+                setRows(mapped);
             } catch (err) {
                 if (!cancelled)
                     setError((err as Error).message ?? 'Fehler beim Laden');
@@ -95,7 +87,6 @@ export default function AdminClientsPage() {
                 if (!cancelled) setLoading(false);
             }
         }
-
         load();
         return () => {
             cancelled = true;
@@ -104,7 +95,7 @@ export default function AdminClientsPage() {
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
-        return clients.filter((c) => {
+        return rows.filter((c) => {
             if (filter !== 'alle' && c.status !== filter) return false;
             if (
                 q &&
@@ -113,7 +104,7 @@ export default function AdminClientsPage() {
                 return false;
             return true;
         });
-    }, [clients, filter, search]);
+    }, [rows, filter, search]);
 
     if (error) {
         return (
@@ -131,24 +122,25 @@ export default function AdminClientsPage() {
         );
     }
 
-    const COLS = '2fr 1fr 1.4fr 80px 1.2fr 100px';
+    const COLS = '2fr 1fr 1.2fr 80px 1.2fr 100px';
+
+    function utilPct(minutes: number, quotaH: number): number {
+        const q = quotaH * 60;
+        return q === 0 ? 0 : Math.round((minutes / q) * 100);
+    }
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-5">
-                <div>
-                    <h1 className="text-[24px] font-semibold text-text tracking-[-0.02em]">
-                        Klienten
-                    </h1>
-                    <p className="text-[13px] text-muted mt-0.5">
-                        {clients.length} gesamt ·{' '}
-                        {clients.filter((c) => c.status === 'aktiv').length}{' '}
-                        aktiv
-                    </p>
-                </div>
+            <div className="mb-5">
+                <h1 className="text-[24px] font-semibold text-text tracking-[-0.02em]">
+                    Meine Klienten
+                </h1>
+                <p className="text-[13px] text-muted mt-0.5">
+                    {rows.length} gesamt ·{' '}
+                    {rows.filter((c) => c.status === 'aktiv').length} aktiv
+                </p>
             </div>
 
-            {/* Filter + Search */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
                 {STATUS_FILTERS.map((s) => (
                     <FilterBtn
@@ -171,12 +163,11 @@ export default function AdminClientsPage() {
             <Card>
                 <div className="px-4 py-3 border-b border-border">
                     <SectionHeader
-                        title="Alle Klienten"
+                        title="Klienten"
                         sub={`${filtered.length} angezeigt`}
                     />
                 </div>
 
-                {/* Header-Row */}
                 <div
                     className="grid gap-4 px-4 py-2.5 border-b border-border"
                     style={{ gridTemplateColumns: COLS }}
@@ -185,7 +176,7 @@ export default function AdminClientsPage() {
                         [
                             'Familie',
                             'Aktenzeichen',
-                            'Fachkräfte',
+                            'Tandem',
                             'Quote',
                             'Auslastung KW',
                             'Status',
@@ -207,12 +198,11 @@ export default function AdminClientsPage() {
                 )}
 
                 {filtered.map((c, i) => {
-                    const quotaMinutes = c.weeklyHoursQuota * 60;
-                    const pct = utilPercent(c.minutesThisWeek, quotaMinutes);
+                    const pct = utilPct(c.minutesThisWeek, c.weeklyHoursQuota);
                     return (
                         <div
                             key={c.id}
-                            onClick={() => navigate(`/admin/clients/${c.id}`)}
+                            onClick={() => navigate(`/clients/${c.id}`)}
                             className={[
                                 'grid gap-4 px-4 py-3 items-center cursor-pointer hover:bg-surface-hover transition-colors duration-100',
                                 i < filtered.length - 1
@@ -240,27 +230,30 @@ export default function AdminClientsPage() {
                             </span>
 
                             <div className="flex items-center gap-1.5 min-w-0">
-                                {c._fkDetails.map((u, idx) => (
-                                    <div
-                                        key={u.id ?? u._id}
-                                        className={idx > 0 ? '-ml-1.5' : ''}
-                                        title={`${u.firstName} ${u.lastName}`}
-                                    >
-                                        <Avatar
-                                            name={`${u.firstName} ${u.lastName}`}
-                                            size={22}
-                                            color={pickFkColor(idx)}
-                                        />
-                                    </div>
-                                ))}
-                                {c._fkDetails.length === 0 && (
+                                {c.fkDetails.length > 1 ? (
+                                    <>
+                                        {c.fkDetails.map((u, idx) => (
+                                            <div
+                                                key={u.id ?? u._id}
+                                                className={
+                                                    idx > 0 ? '-ml-1.5' : ''
+                                                }
+                                                title={`${u.firstName} ${u.lastName}`}
+                                            >
+                                                <Avatar
+                                                    name={`${u.firstName} ${u.lastName}`}
+                                                    size={22}
+                                                    color={pickFkColor(idx)}
+                                                />
+                                            </div>
+                                        ))}
+                                        <span className="text-[11px] font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-1">
+                                            Tandem
+                                        </span>
+                                    </>
+                                ) : (
                                     <span className="text-[12px] text-muted">
-                                        —
-                                    </span>
-                                )}
-                                {c._fkDetails.length > 1 && (
-                                    <span className="text-[11px] font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-1">
-                                        Tandem
+                                        Allein
                                     </span>
                                 )}
                             </div>
