@@ -16,3 +16,4 @@ export { TabBtn } from './TabBtn';
 export { FilterBtn } from './FilterBtn';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as Modal } from './Modal';
+export { default as NotificationBell } from './NotificationBell';

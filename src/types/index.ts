@@ -175,6 +175,30 @@ export interface ClientDoc {
     downloadUrl?: string;
 }
 
+export type NotificationType =
+    | 'tandem_invite'
+    | 'calendar_event_added'
+    | 'calendar_event_updated'
+    | 'vacation_pending'
+    | 'vacation_approved'
+    | 'vacation_denied'
+    | 'sick_leave'
+    | 'shift_overlap';
+
+export interface Notification {
+    _id: string;
+    id?: string;
+    userId: string;
+    type: NotificationType;
+    title: string;
+    message: string;
+    link?: string;
+    payload?: Record<string, unknown>;
+    read: boolean;
+    readAt?: string;
+    createdAt: string;
+}
+
 export interface VerlaufEntry {
     id: string;
     date: string;

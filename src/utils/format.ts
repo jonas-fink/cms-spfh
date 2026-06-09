@@ -125,6 +125,23 @@ export function getGreeting(): string {
     return 'Guten Abend';
 }
 
+/** Kompakte relative Zeit: 'jetzt', 'vor 5 min', 'vor 2 Std', 'vor 3 Tg'. */
+export function formatRelativeShort(iso: string): string {
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const minutes = Math.floor(diffMs / 60_000);
+    if (minutes < 1) return 'jetzt';
+    if (minutes < 60) return `vor ${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `vor ${hours} Std`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `vor ${days} Tg`;
+    return new Date(iso).toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+    });
+}
+
 /** Formatiert Bytes in lesbare Größe: '2.4 MB', '340 KB'. */
 export function formatFileSize(bytes: number): string {
     if (bytes >= 1_048_576) return `${(bytes / 1_048_576).toFixed(1)} MB`;

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import Icon from './Icon';
+import NotificationBell from './NotificationBell';
 
 interface Breadcrumb {
     label: string;
@@ -9,14 +10,10 @@ interface Breadcrumb {
 
 interface TopbarProps {
     breadcrumbs: Breadcrumb[];
-    notificationCount?: number;
     onNavigate?: (path: string) => void;
 }
 
-export default function Topbar({
-    breadcrumbs,
-    notificationCount = 0,
-}: TopbarProps) {
+export default function Topbar({ breadcrumbs }: TopbarProps) {
     const [focused, setFocused] = useState(false);
 
     return (
@@ -77,12 +74,7 @@ export default function Topbar({
             </div>
 
             {/* Bell */}
-            <button className="relative text-muted hover:text-text p-1.5 rounded-md transition-colors">
-                <Icon name="bell" size={17} />
-                {notificationCount > 0 && (
-                    <span className="absolute top-1 right-1 w-1.75 h-1.75 rounded-full bg-orange-500 border-[1.5px] border-bg" />
-                )}
-            </button>
+            <NotificationBell />
         </header>
     );
 }
