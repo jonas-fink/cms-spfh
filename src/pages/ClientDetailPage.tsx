@@ -75,6 +75,7 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
     const [documents, setDocuments] = useState<ClientDoc[]>([]);
     const [hilfeplan, setHilfeplan] = useState<HilfePlan | null>(null);
     const [fkMap, setFkMap] = useState<FKMap>({});
+    const [assignedFKs, setAssignedFKs] = useState<PopulatedUser[]>([]);
     const [activeTab, setActiveTab] = useState<ActiveTab>('uebersicht');
     const [apptFilter, setApptFilter] = useState<ApptFilter>('alle');
     const [loading, setLoading] = useState(true);
@@ -307,6 +308,7 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
                 };
 
                 setClient(normalizedClient);
+                setAssignedFKs(apiClient.assignedFachkraefte);
                 setAppointments(normalizedAppts);
                 setDocuments(normalizedDocs);
                 setHilfeplan(hilfeplanRes);
@@ -482,6 +484,7 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
                 <AppointmentForm
                     clientId={client.id}
                     mode="create"
+                    assignedFachkraefte={assignedFKs}
                     onSuccess={handleApptSaved}
                     onCancel={() => setApptModalOpen(false)}
                 />

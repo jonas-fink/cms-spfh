@@ -1,7 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '../shared';
 import { api } from '../../utils/api';
-import type { Appointment, AppointmentStatus } from '../../types';
+import type {
+    Appointment,
+    AppointmentStatus,
+    PopulatedUser,
+} from '../../types';
+import { useAuth } from '../../context/auth';
 
 type FormType =
     | 'Hausbesuch'
@@ -28,6 +33,8 @@ interface AppointmentFormProps {
     appointment?: Appointment;
     onSuccess: () => void | Promise<void>;
     onCancel: () => void;
+    assignedFachkraefte?: PopulatedUser[];
+    initialParticipants?: string[];
 }
 
 function toLocalInputValue(iso: string): string {
@@ -43,7 +50,10 @@ export default function AppointmentForm({
     appointment,
     onSuccess,
     onCancel,
+    assignedFachkraefte = [],
+    initialParticipants,
 }: AppointmentFormProps) {
+    const { user } = useAuth();
     const [type, setType] = useState<FormType>(
         (appointment?.type as FormType) ?? 'Hausbesuch',
     );
@@ -62,7 +72,16 @@ export default function AppointmentForm({
         appointment?.durationMinutes ?? 0,
     );
     const [report, setReport] = useState<string>(appointment?.report ?? '');
+    const [participantIds, setParticipantIds] = useState<string[]>(
+        () => initialParticipants ?? [],
+    );
     const [submitting, setSubmitting] = useState(false);
+
+    function toggleParticipant(id: string) {
+        setParticipantIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+        );
+    }
     const [error, setError] = useState<string | null>(null);
 
     async function handleSubmit(e: FormEvent) {
@@ -80,6 +99,7 @@ export default function AppointmentForm({
                     status === 'durchgeführt' && report.trim() === ''
                         ? '-'
                         : report || '-',
+                participants: participantIds,
             };
 
             if (mode === 'create') {
@@ -209,6 +229,37 @@ export default function AppointmentForm({
                     className="px-2.5 py-2 rounded-md bg-bg border border-border text-[13px] text-text leading-relaxed focus:outline-none focus:border-border-strong resize-y"
                 />
             </label>
+
+            {assignedFachkraefte.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                    <span className="text-[11.5px] text-muted font-medium">
+                        Tandem-Teilnehmer (optional)
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                        {assignedFachkraefte
+                            .filter((fk) => fk._id !== user?.id)
+                            .map((fk) => {
+                                const active = participantIds.includes(fk._id);
+                                return (
+                                    <button
+                                        key={fk._id}
+                                        type="button"
+                                        onClick={() =>
+                                            toggleParticipant(fk._id)
+                                        }
+                                        className={`px-2 py-1 rounded-md border text-[11.5px] cursor-pointer transition-colors ${
+                                            active
+                                                ? 'bg-accent text-white border-accent'
+                                                : 'bg-surface text-muted border-border hover:border-border-strong'
+                                        }`}
+                                    >
+                                        {fk.firstName} {fk.lastName}
+                                    </button>
+                                );
+                            })}
+                    </div>
+                </div>
+            )}
 
             {error && (
                 <p className="text-[12.5px] text-red-600 m-0">{error}</p>

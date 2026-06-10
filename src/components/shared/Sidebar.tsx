@@ -21,6 +21,7 @@ const adminNav: NavItem[] = [
     { path: '/admin', label: 'Übersicht', icon: 'home' },
     { path: '/admin/fachkraefte', label: 'Fachkräfte', icon: 'users' },
     { path: '/admin/clients', label: 'Klienten', icon: 'user' },
+    { path: '/admin/calendar', label: 'Einsatzplaner', icon: 'calendar' },
     { path: '/admin/stats', label: 'Auslastung', icon: 'chart' },
     { path: '/admin/documents', label: 'Dokumente', icon: 'file' },
 ];

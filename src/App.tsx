@@ -63,6 +63,10 @@ export const router = createBrowserRouter([
                         path: '/admin/notifications',
                         element: <NotificationsPage />,
                     },
+                    {
+                        path: '/admin/calendar',
+                        element: <CalendarPage />,
+                    },
                 ],
             },
         ],

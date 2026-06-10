@@ -199,6 +199,41 @@ export interface Notification {
     createdAt: string;
 }
 
+export type CalendarEventType =
+    | 'team_meeting'
+    | 'koordination'
+    | 'sonstiges'
+    | 'urlaub'
+    | 'krank';
+
+export type CalendarEventStatus = 'geplant' | 'durchgeführt' | 'abgesagt';
+export type CalendarEventVisibility = 'team' | 'private';
+export type CalendarParticipantResponse = 'pending' | 'accepted' | 'declined';
+
+export interface ApiCalendarParticipant {
+    userId: PopulatedUser | string;
+    response: CalendarParticipantResponse;
+    respondedAt?: string;
+}
+
+export interface ApiCalendarEvent {
+    _id: string;
+    id?: string;
+    createdBy: PopulatedUser | string;
+    title: string;
+    description?: string;
+    type: CalendarEventType;
+    date: string;
+    endDate?: string;
+    durationMinutes?: number;
+    participants: ApiCalendarParticipant[];
+    status: CalendarEventStatus;
+    visibility: CalendarEventVisibility;
+    relatedClientId?: { _id: string; familyName: string; caseNumber?: string } | string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface VerlaufEntry {
     id: string;
     date: string;
