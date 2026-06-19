@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import Icon from './Icon';
-import { useNotifications } from '../../context/notifications';
-import { useAuth } from '../../context/auth';
+import { useNotifications } from '../../context/NotificationContext';
+import { useAuth } from '../../context/AuthContext';
 import type { Notification } from '../../types';
 import { formatRelativeShort } from '../../utils/format';
 

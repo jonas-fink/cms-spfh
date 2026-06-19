@@ -4,11 +4,12 @@ import {
     DashboardGreeting,
     KPIStrip,
     ClientsGrid,
-    WeeklyChartSection,
+    WeeklyChart,
     UpcomingAppointmentsRail,
     OpenTasksRail,
 } from '../components/dashboard';
-import { useAuth } from '../context/auth';
+import { SectionHeader } from '../components/shared';
+import { useAuth } from '../context/AuthContext';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { formatDuration } from '../utils/format';
 
@@ -90,12 +91,12 @@ export default function FKDashboard() {
                         onShowAll={() => navigate('/clients')}
                     />
 
-                    <WeeklyChartSection
-                        minutesPerDay={minutesPerDay}
-                        weekDays={weekDays}
-                        totalMinutes={kpis.minutesThisWeek}
-                        kw={kw}
-                    />
+                    <section>
+                        <SectionHeader title="Stunden diese Woche" sub="durchgeführte Termine" />
+                        <div className="mt-4">
+                            <WeeklyChart minutesPerDay={minutesPerDay} weekDays={weekDays} totalMinutes={kpis.minutesThisWeek} kw={kw} />
+                        </div>
+                    </section>
                 </div>
 
                 <div className="flex flex-col gap-6">

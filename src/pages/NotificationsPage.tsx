@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { api } from '../utils/api';
-import { useNotifications } from '../context/notifications';
+import { useNotifications } from '../context/NotificationContext';
 import { FilterBtn, Icon, SectionHeader } from '../components/shared';
 import { formatRelativeShort } from '../utils/format';
 import type { Notification } from '../types';

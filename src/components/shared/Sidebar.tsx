@@ -1,4 +1,4 @@
-import { useAuth } from '../../context/auth';
+import { useAuth } from '../../context/AuthContext';
 import { Link, useLocation } from 'react-router';
 import Icon, { type IconName } from './Icon';
 import Avatar from './Avatar';

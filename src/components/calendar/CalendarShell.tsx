@@ -4,7 +4,7 @@ import { Button, Card, FilterBtn, Modal } from '../shared';
 import type { ApiCalendarEvent } from '../../types';
 import { api } from '../../utils/api';
 import { getISOWeek } from '../../utils/format';
-import { useAuth } from '../../context/auth';
+import { useAuth } from '../../context/AuthContext';
 import WeekView from './WeekView';
 import CalendarEventForm from './CalendarEventForm';
 import EventDetailModal from './EventDetailModal';

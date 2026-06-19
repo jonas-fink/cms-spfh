@@ -1,7 +1,31 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { api, setAccessToken, tryRefresh } from '../utils/api';
-import { AuthContext, type AuthUser, type LoginInput } from './auth';
+
+export interface AuthUser {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: 'fachkraft' | 'admin';
+}
+
+interface LoginInput { email: string; password: string; }
+
+interface AuthContextValue {
+    user: AuthUser | null;
+    loading: boolean;
+    login: (input: LoginInput) => Promise<void>;
+    logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export function useAuth(): AuthContextValue {
+    const ctx = useContext(AuthContext);
+    if (!ctx) throw new Error('useAuth muss innerhalb von <AuthProvider> verwendet werden');
+    return ctx;
+}
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<AuthUser | null>(null);
@@ -11,12 +35,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         let cancelled = false;
-
         async function init() {
             try {
                 const ok = await tryRefresh();
                 if (!ok) throw new Error('Keine gültige Session');
-
                 const me = await api.get<AuthUser>('/auth/me');
                 if (!cancelled) setUser(me);
             } catch {
@@ -26,32 +48,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
         }
         init();
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, []);
 
-    const login = useCallback(
-        async ({ email, password }: LoginInput) => {
-            const data = await api.post<{
-                accessToken: string;
-                user: AuthUser;
-            }>('/auth/login', { email, password });
-            setAccessToken(data.accessToken);
-            setUser(data.user);
-            navigate(data.user.role === 'admin' ? '/admin' : '/dashboard');
-        },
-        [navigate],
-    );
+    const login = useCallback(async ({ email, password }: LoginInput) => {
+        const data = await api.post<{ accessToken: string; user: AuthUser }>('/auth/login', { email, password });
+        setAccessToken(data.accessToken);
+        setUser(data.user);
+        navigate(data.user.role === 'admin' ? '/admin' : '/dashboard');
+    }, [navigate]);
 
     const logout = useCallback(async () => {
-        try {
-            await api.post('/auth/logout');
-        } finally {
-            setAccessToken(null);
-            setUser(null);
-            navigate('/login');
-        }
+        try { await api.post('/auth/logout'); }
+        finally { setAccessToken(null); setUser(null); navigate('/login'); }
     }, [navigate]);
 
     logoutRef.current = logout;

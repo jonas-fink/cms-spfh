@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import RootLayout from './layouts/RootLayout';
-import AppLayout from './layouts/AppLayout';
-import AdminLayout from './layouts/AdminLayout';
+import ShellLayout from './layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import FKDashboard from './pages/FKDashboard';
 import ClientDetailPage from './pages/ClientDetailPage';
@@ -24,7 +23,7 @@ export const router = createBrowserRouter([
                 element: <LoginPage />,
             },
             {
-                element: <AppLayout />,
+                element: <ShellLayout role="fachkraft" />,
                 children: [
                     {
                         index: true,
@@ -39,7 +38,7 @@ export const router = createBrowserRouter([
                 ],
             },
             {
-                element: <AdminLayout />,
+                element: <ShellLayout role="admin" />,
                 children: [
                     { path: '/admin', element: <AdminDashboardPage /> },
                     {
