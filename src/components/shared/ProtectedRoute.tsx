@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router';
-import { useAuth } from '../../context/auth';
+import { useAuth } from '../../context/AuthContext';
 
 interface ProtectedRouteProps {
     role?: 'fachkraft' | 'admin';

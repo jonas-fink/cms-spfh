@@ -6,7 +6,7 @@ import type {
     AppointmentStatus,
     PopulatedUser,
 } from '../../types';
-import { useAuth } from '../../context/auth';
+import { useAuth } from '../../context/AuthContext';
 
 type FormType =
     | 'Hausbesuch'

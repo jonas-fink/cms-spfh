@@ -1,6 +1,6 @@
 // src/pages/LoginPage.tsx
 import { useState } from 'react';
-import { useAuth } from '../context/auth';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
     const { login } = useAuth();
