@@ -70,6 +70,16 @@ export function formatDuration(hours: number, minutes: number): string {
     return `${hours}:${String(minutes).padStart(2, '0')}h`;
 }
 
+/** Formatiert Minuten zu '2:34h' / '45 min' / '-1:20h' (Vorzeichen für Saldo). */
+export function formatMinutes(total: number): string {
+    const sign = total < 0 ? '-' : '';
+    const t = Math.abs(Math.round(total));
+    const h = Math.floor(t / 60);
+    const m = t % 60;
+    if (h === 0) return `${sign}${m} min`;
+    return `${sign}${h}:${String(m).padStart(2, '0')}h`;
+}
+
 /**
  * Gibt die ISO-Kalenderwoche für ein Datum zurück.
  * Woche beginnt am Montag (ISO 8601).

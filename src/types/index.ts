@@ -4,7 +4,7 @@ export type AppointmentType =
     | 'Hausbesuch'
     | 'Krisenintervention'
     | 'Telefongespräch'
-    | 'Beratungsgespräch'
+    | 'Beratung'
     | 'Sonstiges';
 
 export type ClientStatus = 'aktiv' | 'pausiert' | 'abgeschlossen';
@@ -229,9 +229,102 @@ export interface ApiCalendarEvent {
     participants: ApiCalendarParticipant[];
     status: CalendarEventStatus;
     visibility: CalendarEventVisibility;
-    relatedClientId?: { _id: string; familyName: string; caseNumber?: string } | string;
+    relatedClientId?:
+        | { _id: string; familyName: string; caseNumber?: string }
+        | string;
     createdAt: string;
     updatedAt: string;
+}
+
+// Cross-client Termin-Shape für den Einsatzplaner (GET /appointments)
+export interface ApiCalendarAppointment {
+    _id: string;
+    clientId: { _id: string; familyName: string; caseNumber?: string } | string;
+    createdBy: PopulatedUser | string;
+    participants: PopulatedUser[];
+    type: AppointmentType;
+    status: AppointmentStatus;
+    date: string;
+    durationHours: number;
+    durationMinutes: 0 | 15 | 30 | 45;
+    report: string;
+}
+
+// Einheitliches Item für WeekView/EventCard: interner Event oder Klienten-Termin
+export type CalendarItem =
+    | { kind: 'event'; event: ApiCalendarEvent }
+    | { kind: 'appointment'; appt: ApiCalendarAppointment };
+
+// Phase 8 – Arbeitszeiterfassung
+
+export interface ApiWorkBreak {
+    start: string;
+    end?: string;
+    durationMinutes?: number;
+}
+
+export interface ApiWorkSession {
+    _id: string;
+    id?: string;
+    userId: string;
+    date: string;
+    clockIn: string;
+    clockOut?: string;
+    breaks: ApiWorkBreak[];
+    totalMinutes?: number;
+    manuallyEdited: boolean;
+    notes?: string;
+}
+
+export interface ApiClockStatus {
+    user: { id: string; name: string };
+    active: boolean;
+    onBreak: boolean;
+    since: string | null;
+    todayMinutes: number;
+    weekMinutes: number;
+    overtimeMinutes: number;
+}
+
+export interface ApiOvertime {
+    weekMinutes: number;
+    weeklyTargetMinutes: number;
+    overtimeMinutes: number;
+}
+
+// Phase 9 – Urlaub + Krankmeldung
+
+export type VacationType = 'urlaub' | 'ueberstundenabbau';
+export type VacationStatus = 'pending' | 'approved' | 'denied';
+
+export interface ApiVacationRequest {
+    _id: string;
+    id?: string;
+    userId: PopulatedUser | string;
+    type: VacationType;
+    startDate: string;
+    endDate: string;
+    workingDays: number;
+    status: VacationStatus;
+    requestNote?: string;
+    createdAt: string;
+}
+
+export interface ApiSickLeave {
+    _id: string;
+    id?: string;
+    userId: PopulatedUser | string;
+    startDate: string;
+    endDate?: string;
+    note?: string;
+    reportedAt: string;
+}
+
+export interface ApiVacationBalance {
+    vacationDaysPerYear: number;
+    usedDays: number;
+    remainingDays: number;
+    overtimeMinutes: number;
 }
 
 export interface VerlaufEntry {

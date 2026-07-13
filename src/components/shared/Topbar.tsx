@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import Icon from './Icon';
 import NotificationBell from './NotificationBell';
+import ClockInWidget from './ClockInWidget';
 
 interface Breadcrumb {
     label: string;
@@ -10,10 +11,11 @@ interface Breadcrumb {
 
 interface TopbarProps {
     breadcrumbs: Breadcrumb[];
+    role?: 'fachkraft' | 'admin';
     onNavigate?: (path: string) => void;
 }
 
-export default function Topbar({ breadcrumbs }: TopbarProps) {
+export default function Topbar({ breadcrumbs, role }: TopbarProps) {
     const [focused, setFocused] = useState(false);
 
     return (
@@ -72,6 +74,9 @@ export default function Topbar({ breadcrumbs }: TopbarProps) {
           `}
                 />
             </div>
+
+            {/* Zeiterfassung (nur Fachkraft) */}
+            {role === 'fachkraft' && <ClockInWidget />}
 
             {/* Bell */}
             <NotificationBell />

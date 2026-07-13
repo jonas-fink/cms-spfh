@@ -15,6 +15,8 @@ const fkNav: NavItem[] = [
     { path: '/clients', label: 'Meine Klienten', icon: 'users' },
     { path: '/calendar', label: 'Termine', icon: 'calendar' },
     { path: '/documents', label: 'Dokumente', icon: 'file' },
+    { path: '/zeiterfassung', label: 'Zeiterfassung', icon: 'clock' },
+    { path: '/vacation', label: 'Urlaub', icon: 'star' },
 ];
 
 const adminNav: NavItem[] = [
@@ -22,6 +24,8 @@ const adminNav: NavItem[] = [
     { path: '/admin/fachkraefte', label: 'Fachkräfte', icon: 'users' },
     { path: '/admin/clients', label: 'Klienten', icon: 'user' },
     { path: '/admin/calendar', label: 'Einsatzplaner', icon: 'calendar' },
+    { path: '/admin/zeiterfassung', label: 'Zeiterfassung', icon: 'clock' },
+    { path: '/admin/urlaub', label: 'Urlaub', icon: 'star' },
     { path: '/admin/stats', label: 'Auslastung', icon: 'chart' },
     { path: '/admin/documents', label: 'Dokumente', icon: 'file' },
 ];

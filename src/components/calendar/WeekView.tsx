@@ -1,23 +1,36 @@
 import { useMemo } from 'react';
-import type { ApiCalendarEvent } from '../../types';
+import type { CalendarItem } from '../../types';
 import { DAY_LABELS, isSameDay } from '../../utils/format';
 import EventCard from './EventCard';
 
 interface WeekViewProps {
     weekStart: Date;
-    events: ApiCalendarEvent[];
+    items: CalendarItem[];
     currentUserId: string;
     colorMode: 'creator' | 'self';
-    onEventClick: (event: ApiCalendarEvent) => void;
+    onItemClick: (item: CalendarItem) => void;
     onDayClick?: (day: Date) => void;
+}
+
+function itemKey(item: CalendarItem): string {
+    return item.kind === 'event' ? `e-${item.event._id}` : `a-${item.appt._id}`;
+}
+
+function itemStart(item: CalendarItem): Date {
+    return new Date(item.kind === 'event' ? item.event.date : item.appt.date);
+}
+
+function itemEnd(item: CalendarItem): Date {
+    if (item.kind === 'appointment') return itemStart(item);
+    return item.event.endDate ? new Date(item.event.endDate) : itemStart(item);
 }
 
 export default function WeekView({
     weekStart,
-    events,
+    items,
     currentUserId,
     colorMode,
-    onEventClick,
+    onItemClick,
     onDayClick,
 }: WeekViewProps) {
     const days = useMemo(() => {
@@ -29,43 +42,39 @@ export default function WeekView({
         });
     }, [weekStart]);
 
-    const eventsByDay = useMemo(() => {
-        const map = new Map<number, ApiCalendarEvent[]>();
-        for (const ev of events) {
-            const start = new Date(ev.date);
-            const end = ev.endDate ? new Date(ev.endDate) : start;
+    const itemsByDay = useMemo(() => {
+        const map = new Map<number, CalendarItem[]>();
+        for (const item of items) {
+            const start = itemStart(item);
+            const end = itemEnd(item);
             for (const day of days) {
-                if (
-                    isSameDay(day, start) ||
-                    (start <= day && day <= end)
-                ) {
+                if (isSameDay(day, start) || (start <= day && day <= end)) {
                     const list = map.get(day.getTime()) ?? [];
-                    if (!list.includes(ev)) list.push(ev);
+                    if (!list.includes(item)) list.push(item);
                     map.set(day.getTime(), list);
                 }
             }
         }
         for (const [k, list] of map) {
             list.sort(
-                (a, b) =>
-                    new Date(a.date).getTime() - new Date(b.date).getTime(),
+                (a, b) => itemStart(a).getTime() - itemStart(b).getTime(),
             );
             map.set(k, list);
         }
         return map;
-    }, [days, events]);
+    }, [days, items]);
 
     const today = new Date();
 
     return (
         <div className="grid grid-cols-7 gap-2">
             {days.map((day, i) => {
-                const dayEvents = eventsByDay.get(day.getTime()) ?? [];
+                const dayItems = itemsByDay.get(day.getTime()) ?? [];
                 const isToday = isSameDay(day, today);
                 return (
                     <div
                         key={day.toISOString()}
-                        className="flex flex-col gap-1.5 min-h-[200px]"
+                        className="flex flex-col gap-1.5 min-h-50"
                     >
                         <button
                             type="button"
@@ -88,17 +97,17 @@ export default function WeekView({
                             </div>
                         </button>
                         <div className="flex flex-col gap-1">
-                            {dayEvents.length === 0 && (
+                            {dayItems.length === 0 && (
                                 <div className="text-[11px] text-muted/60 italic px-1">
                                     keine Termine
                                 </div>
                             )}
-                            {dayEvents.map((ev) => (
+                            {dayItems.map((item) => (
                                 <EventCard
-                                    key={ev._id}
-                                    event={ev}
+                                    key={itemKey(item)}
+                                    item={item}
                                     currentUserId={currentUserId}
-                                    onClick={onEventClick}
+                                    onClick={onItemClick}
                                     colorMode={colorMode}
                                 />
                             ))}

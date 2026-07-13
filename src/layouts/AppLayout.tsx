@@ -15,7 +15,7 @@ export default function ShellLayout({ role }: ShellLayoutProps) {
                 <div className="flex min-h-screen bg-bg text-text font-sans">
                     <Sidebar />
                     <div className="flex-1 min-w-0 flex flex-col">
-                        <Topbar breadcrumbs={[]} />
+                        <Topbar breadcrumbs={[]} role={role} />
                         <main className="flex-1 px-8 pt-7 pb-16 max-w-7xl w-full mx-auto">
                             <Outlet />
                         </main>

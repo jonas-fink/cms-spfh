@@ -13,6 +13,10 @@ import ClientsListPage from './pages/ClientsListPage';
 import CalendarPage from './pages/CalendarPage';
 import DocumentsPage from './pages/DocumentsPage';
 import NotificationsPage from './pages/NotificationsPage';
+import ZeiterfassungPage from './pages/ZeiterfassungPage';
+import AdminZeiterfassungPage from './pages/AdminZeiterfassungPage';
+import VacationPage from './pages/VacationPage';
+import AdminVacationPage from './pages/AdminVacationPage';
 
 export const router = createBrowserRouter([
     {
@@ -34,6 +38,11 @@ export const router = createBrowserRouter([
                     { path: '/clients/:id', element: <ClientDetailPage /> },
                     { path: '/calendar', element: <CalendarPage /> },
                     { path: '/documents', element: <DocumentsPage /> },
+                    {
+                        path: '/zeiterfassung',
+                        element: <ZeiterfassungPage />,
+                    },
+                    { path: '/vacation', element: <VacationPage /> },
                     { path: '/notifications', element: <NotificationsPage /> },
                 ],
             },
@@ -53,6 +62,11 @@ export const router = createBrowserRouter([
                         path: '/admin/clients/:id',
                         element: <ClientDetailPage mode="admin" />,
                     },
+                    {
+                        path: '/admin/zeiterfassung',
+                        element: <AdminZeiterfassungPage />,
+                    },
+                    { path: '/admin/urlaub', element: <AdminVacationPage /> },
                     { path: '/admin/stats', element: <AdminStatsPage /> },
                     {
                         path: '/admin/documents',

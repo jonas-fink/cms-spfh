@@ -23,7 +23,11 @@ const TYPES: FormType[] = [
     'Sonstiges',
 ];
 
-const STATUSES: AppointmentStatus[] = ['geplant', 'durchgeführt', 'ausgefallen'];
+const STATUSES: AppointmentStatus[] = [
+    'geplant',
+    'durchgeführt',
+    'ausgefallen',
+];
 
 const MINUTES: Array<0 | 15 | 30 | 45> = [0, 15, 30, 45];
 
@@ -35,6 +39,7 @@ interface AppointmentFormProps {
     onCancel: () => void;
     assignedFachkraefte?: PopulatedUser[];
     initialParticipants?: string[];
+    initialDate?: Date;
 }
 
 function toLocalInputValue(iso: string): string {
@@ -52,6 +57,7 @@ export default function AppointmentForm({
     onCancel,
     assignedFachkraefte = [],
     initialParticipants,
+    initialDate,
 }: AppointmentFormProps) {
     const { user } = useAuth();
     const [type, setType] = useState<FormType>(
@@ -63,7 +69,7 @@ export default function AppointmentForm({
     const [date, setDate] = useState<string>(
         appointment
             ? toLocalInputValue(appointment.date)
-            : toLocalInputValue(new Date().toISOString()),
+            : toLocalInputValue((initialDate ?? new Date()).toISOString()),
     );
     const [durationHours, setDurationHours] = useState<number>(
         appointment?.durationHours ?? 1,
@@ -89,7 +95,7 @@ export default function AppointmentForm({
         setError(null);
         setSubmitting(true);
         try {
-            const body = {
+            const body: Record<string, unknown> = {
                 type,
                 status,
                 date: new Date(date).toISOString(),
@@ -99,8 +105,12 @@ export default function AppointmentForm({
                     status === 'durchgeführt' && report.trim() === ''
                         ? '-'
                         : report || '-',
-                participants: participantIds,
             };
+            // Teilnehmer nur senden, wenn der Selector angezeigt wird –
+            // sonst würde ein Status-Edit die Tandem-Teilnehmer löschen.
+            if (assignedFachkraefte.length > 0) {
+                body.participants = participantIds;
+            }
 
             if (mode === 'create') {
                 await api.post(`/clients/${clientId}/appointments`, {
@@ -261,9 +271,7 @@ export default function AppointmentForm({
                 </div>
             )}
 
-            {error && (
-                <p className="text-[12.5px] text-red-600 m-0">{error}</p>
-            )}
+            {error && <p className="text-[12.5px] text-red-600 m-0">{error}</p>}
 
             <div className="flex items-center justify-end gap-2 pt-1">
                 <Button

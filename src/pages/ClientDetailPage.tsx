@@ -81,6 +81,7 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [apptModalOpen, setApptModalOpen] = useState(false);
+    const [editAppt, setEditAppt] = useState<Appointment | null>(null);
     const [reloadKey, setReloadKey] = useState(0);
     const docsRef = useRef<TabDokumenteHandle>(null);
 
@@ -188,6 +189,18 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
 
     async function handleApptSaved() {
         setApptModalOpen(false);
+        await reloadAppts();
+    }
+
+    async function handleEditApptSaved() {
+        setEditAppt(null);
+        await reloadAppts();
+    }
+
+    async function handleDeleteAppointment(appt: Appointment) {
+        if (!id) return;
+        if (!window.confirm('Diesen Termin wirklich löschen?')) return;
+        await api.delete(`/clients/${id}/appointments/${appt.id}`);
         await reloadAppts();
     }
 
@@ -452,6 +465,12 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
                         onNewAppointment={
                             isAdmin ? undefined : handleNewAppointment
                         }
+                        onEditAppointment={
+                            isAdmin ? undefined : setEditAppt
+                        }
+                        onDeleteAppointment={
+                            isAdmin ? undefined : handleDeleteAppointment
+                        }
                         readOnly={isAdmin}
                     />
                 )}
@@ -488,6 +507,24 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
                     onSuccess={handleApptSaved}
                     onCancel={() => setApptModalOpen(false)}
                 />
+            </Modal>
+
+            <Modal
+                open={!!editAppt}
+                onClose={() => setEditAppt(null)}
+                title="Termin bearbeiten"
+            >
+                {editAppt && (
+                    // Kein assignedFachkraefte → Tandem-Selector aus, damit ein
+                    // Status-/Typ-Edit die bestehenden Teilnehmer nicht überschreibt.
+                    <AppointmentForm
+                        clientId={client.id}
+                        mode="edit"
+                        appointment={editAppt}
+                        onSuccess={handleEditApptSaved}
+                        onCancel={() => setEditAppt(null)}
+                    />
+                )}
             </Modal>
         </div>
     );
