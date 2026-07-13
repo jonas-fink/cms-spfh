@@ -9,6 +9,8 @@ interface TabTermineProps {
     onFilterChange: (f: ApptFilter) => void;
     fkMap: FKMap;
     onNewAppointment?: () => void;
+    onEditAppointment?: (appt: Appointment) => void;
+    onDeleteAppointment?: (appt: Appointment) => void;
     readOnly?: boolean;
 }
 
@@ -25,6 +27,8 @@ export function TabTermine({
     onFilterChange,
     fkMap,
     onNewAppointment,
+    onEditAppointment,
+    onDeleteAppointment,
     readOnly = false,
 }: TabTermineProps) {
     const filtered =
@@ -156,14 +160,32 @@ export function TabTermine({
                                         <td className="px-3 py-3">
                                             {!readOnly && (
                                                 <div className="flex gap-0.5">
-                                                    <button className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100">
+                                                    <button
+                                                        type="button"
+                                                        title="Bearbeiten"
+                                                        onClick={() =>
+                                                            onEditAppointment?.(
+                                                                appt,
+                                                            )
+                                                        }
+                                                        className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100"
+                                                    >
                                                         <Icon
                                                             name="edit"
                                                             size={14}
                                                             stroke={1.75}
                                                         />
                                                     </button>
-                                                    <button className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100">
+                                                    <button
+                                                        type="button"
+                                                        title="Löschen"
+                                                        onClick={() =>
+                                                            onDeleteAppointment?.(
+                                                                appt,
+                                                            )
+                                                        }
+                                                        className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100"
+                                                    >
                                                         <Icon
                                                             name="trash"
                                                             size={14}

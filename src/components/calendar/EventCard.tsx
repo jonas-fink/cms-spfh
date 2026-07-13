@@ -1,12 +1,12 @@
-import type { ApiCalendarEvent, PopulatedUser } from '../../types';
+import type { CalendarItem, PopulatedUser } from '../../types';
 import { Avatar, Icon } from '../shared';
 import { formatTime } from '../../utils/format';
 import { colorForUserId, TYPE_LABELS } from './colors';
 
 interface EventCardProps {
-    event: ApiCalendarEvent;
+    item: CalendarItem;
     currentUserId: string;
-    onClick?: (event: ApiCalendarEvent) => void;
+    onClick?: (item: CalendarItem) => void;
     colorMode?: 'creator' | 'self';
 }
 
@@ -14,12 +14,65 @@ function isPopulated(u: PopulatedUser | string): u is PopulatedUser {
     return typeof u === 'object';
 }
 
+function addMinutes(iso: string, minutes: number): string {
+    return new Date(new Date(iso).getTime() + minutes * 60_000).toISOString();
+}
+
 export default function EventCard({
-    event,
+    item,
     currentUserId,
     onClick,
     colorMode = 'self',
 }: EventCardProps) {
+    // Klienten-Termin: eigener, kompakter Render-Zweig
+    if (item.kind === 'appointment') {
+        const { appt } = item;
+        const familyName =
+            typeof appt.clientId === 'object'
+                ? appt.clientId.familyName
+                : 'Klient';
+        const clientKey =
+            typeof appt.clientId === 'object'
+                ? appt.clientId._id
+                : appt.clientId;
+        const color = colorForUserId(clientKey);
+        const endIso = addMinutes(
+            appt.date,
+            appt.durationHours * 60 + appt.durationMinutes,
+        );
+        return (
+            <button
+                type="button"
+                onClick={() => onClick?.(item)}
+                className={`w-full text-left ${color.bg} hover:brightness-95 rounded-md px-2.5 py-2 border border-border/50 cursor-pointer transition-colors flex flex-col gap-1`}
+            >
+                <div className="flex items-center gap-1.5">
+                    <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
+                    <span className="text-[11px] text-muted tabular-nums">
+                        {formatTime(appt.date)} – {formatTime(endIso)}
+                    </span>
+                    {appt.status === 'ausgefallen' && (
+                        <span className="text-[10px] text-muted line-through">
+                            ausgefallen
+                        </span>
+                    )}
+                </div>
+                <div className="text-[12.5px] font-medium text-text leading-tight truncate">
+                    {familyName}
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10.5px] text-muted">
+                        {appt.type}
+                    </span>
+                    <span className="flex items-center gap-0.5 text-[10px] text-muted">
+                        <Icon name="users" size={10} /> Klient
+                    </span>
+                </div>
+            </button>
+        );
+    }
+
+    const { event } = item;
     const creatorId = isPopulated(event.createdBy)
         ? event.createdBy._id
         : event.createdBy;
@@ -38,7 +91,7 @@ export default function EventCard({
     return (
         <button
             type="button"
-            onClick={() => onClick?.(event)}
+            onClick={() => onClick?.(item)}
             className={`w-full text-left ${color.bg} hover:brightness-95 rounded-md px-2.5 py-2 border border-border/50 cursor-pointer transition-colors flex flex-col gap-1`}
         >
             <div className="flex items-center gap-1.5">
