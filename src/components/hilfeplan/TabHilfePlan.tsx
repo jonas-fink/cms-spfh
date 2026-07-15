@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button, Card, GoalCheck, SectionHeader } from '../shared';
 import { Icon } from '../shared';
 import { formatDate } from '../../utils/format';
@@ -6,10 +5,11 @@ import type { HilfePlan } from '../../types';
 
 interface TabHilfePlanProps {
     hilfeplan: HilfePlan | null;
+    onGoalsChange: (goals: HilfePlan['goals']) => void;
 }
 
-export function TabHilfePlan({ hilfeplan }: TabHilfePlanProps) {
-    const [goals, setGoals] = useState(hilfeplan?.goals ?? []);
+export function TabHilfePlan({ hilfeplan, onGoalsChange }: TabHilfePlanProps) {
+    const goals = hilfeplan?.goals ?? [];
 
     const reached = goals.filter((g) => g.status === 'erreicht').length;
     const progress =
@@ -42,9 +42,7 @@ export function TabHilfePlan({ hilfeplan }: TabHilfePlanProps) {
         idx: number,
         status: 'offen' | 'in Bearbeitung' | 'erreicht',
     ) => {
-        setGoals((prev) =>
-            prev.map((g, i) => (i === idx ? { ...g, status } : g)),
-        );
+        onGoalsChange(goals.map((g, i) => (i === idx ? { ...g, status } : g)));
     };
 
     return (

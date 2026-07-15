@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Card, KPICard, SectionHeader } from '../components/shared';
+import { Button, Card, KPICard, SectionHeader } from '../components/shared';
 import WorkSessionEditModal from '../components/zeiterfassung/WorkSessionEditModal';
 import type { ApiOvertime, ApiWorkSession } from '../types';
 import { api } from '../utils/api';
@@ -24,6 +24,7 @@ export default function ZeiterfassungPage() {
     const [overtime, setOvertime] = useState<ApiOvertime | null>(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState<ApiWorkSession | null>(null);
+    const [creating, setCreating] = useState(false);
 
     // ponytail: nur aktuelle Woche, keine Wochen-Navigation. Reicht für die Demo.
     const load = useCallback(async () => {
@@ -47,7 +48,17 @@ export default function ZeiterfassungPage() {
 
     return (
         <div>
-            <SectionHeader title="Zeiterfassung" sub="Diese Woche" />
+            <div className="flex items-center justify-between">
+                <SectionHeader title="Zeiterfassung" sub="Diese Woche" />
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    icon="plus"
+                    onClick={() => setCreating(true)}
+                >
+                    Neuer Eintrag
+                </Button>
+            </div>
 
             <div className="grid grid-cols-3 gap-3 my-4">
                 <KPICard
@@ -110,12 +121,16 @@ export default function ZeiterfassungPage() {
                 )}
             </Card>
 
-            {editing && (
+            {(editing || creating) && (
                 <WorkSessionEditModal
                     session={editing}
-                    onClose={() => setEditing(null)}
+                    onClose={() => {
+                        setEditing(null);
+                        setCreating(false);
+                    }}
                     onSaved={async () => {
                         setEditing(null);
+                        setCreating(false);
                         await load();
                     }}
                 />
