@@ -175,6 +175,19 @@ export interface ClientDoc {
     downloadUrl?: string;
 }
 
+export interface LibraryDoc {
+    id: string;
+    fileName: string;
+    fileType: 'pdf' | 'docx';
+    fileSizeBytes: number;
+    description?: string;
+    category: string;
+    subfolder?: string;
+    uploadedBy: { _id: string; firstName: string; lastName: string };
+    createdAt: string;
+    downloadUrl: string;
+}
+
 export type NotificationType =
     | 'tandem_invite'
     | 'calendar_event_added'
