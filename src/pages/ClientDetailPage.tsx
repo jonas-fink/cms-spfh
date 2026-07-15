@@ -204,6 +204,18 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
         await reloadAppts();
     }
 
+    async function handleGoalsChange(goals: HilfePlan['goals']) {
+        if (!id) return;
+        const prev = hilfeplan;
+        setHilfeplan((h) => (h ? { ...h, goals } : h)); // optimistisch
+        try {
+            await api.patch(`/clients/${id}/hilfeplan`, { goals });
+        } catch {
+            setHilfeplan(prev); // bei Fehler zurücksetzen
+            alert('Konnte Zielstatus nicht speichern.');
+        }
+    }
+
     useEffect(() => {
         if (!id) return;
         let cancelled = false;
@@ -484,7 +496,10 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
                     />
                 )}
                 {activeTab === 'hilfeplan' && (
-                    <TabHilfePlan hilfeplan={hilfeplan} />
+                    <TabHilfePlan
+                        hilfeplan={hilfeplan}
+                        onGoalsChange={handleGoalsChange}
+                    />
                 )}
                 {activeTab === 'verlauf' && <TabVerlauf verlauf={verlauf} />}
                 {activeTab === 'verwaltung' && isAdmin && (

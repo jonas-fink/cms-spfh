@@ -33,7 +33,8 @@ export type IconName =
     | 'pin'
     | 'star'
     | 'target'
-    | 'sparkle';
+    | 'sparkle'
+    | 'logout';
 
 interface IconProps {
     name: IconName;
@@ -226,6 +227,13 @@ const paths: Record<IconName, React.ReactNode> = {
             <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z" />
             <path d="M5 3l.75 2.25L8 6l-2.25.75L5 9l-.75-2.25L2 6l2.25-.75L5 3z" />
             <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z" />
+        </>
+    ),
+    logout: (
+        <>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
         </>
     ),
 };

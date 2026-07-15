@@ -102,7 +102,7 @@ export default function Sidebar() {
                     className="text-muted hover:text-text p-1 rounded-md transition-colors"
                     title="Abmelden"
                 >
-                    <Icon name="settings" size={15} />
+                    <Icon name="logout" size={15} />
                 </button>
             </div>
         </aside>
