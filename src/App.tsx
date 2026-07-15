@@ -12,6 +12,7 @@ import AdminDocumentsPage from './pages/AdminDocumentsPage';
 import ClientsListPage from './pages/ClientsListPage';
 import CalendarPage from './pages/CalendarPage';
 import DocumentsPage from './pages/DocumentsPage';
+import LibraryPage from './pages/LibraryPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ZeiterfassungPage from './pages/ZeiterfassungPage';
 import AdminZeiterfassungPage from './pages/AdminZeiterfassungPage';
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
                     { path: '/clients/:id', element: <ClientDetailPage /> },
                     { path: '/calendar', element: <CalendarPage /> },
                     { path: '/documents', element: <DocumentsPage /> },
+                    { path: '/library', element: <LibraryPage /> },
                     {
                         path: '/zeiterfassung',
                         element: <ZeiterfassungPage />,
@@ -71,6 +73,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/admin/documents',
                         element: <AdminDocumentsPage />,
+                    },
+                    {
+                        path: '/admin/library',
+                        element: <LibraryPage />,
                     },
                     {
                         path: '/admin/notifications',
