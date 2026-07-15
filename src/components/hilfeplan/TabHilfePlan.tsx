@@ -125,12 +125,12 @@ export function TabHilfePlan({ hilfeplan, onGoalsChange }: TabHilfePlanProps) {
                                     key={v}
                                     className={`flex items-center gap-2.5 px-2.5 py-2 rounded-[7px] border ${
                                         isCurrent
-                                            ? 'bg-accent/[0.06] border-accent/20'
+                                            ? 'bg-accent/6 border-accent/20'
                                             : 'bg-transparent border-transparent'
                                     }`}
                                 >
                                     <div
-                                        className={`shrink-0 w-6 h-6 rounded-[6px] flex items-center justify-center text-[11px] font-semibold ${
+                                        className={`shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-semibold ${
                                             isCurrent
                                                 ? 'bg-accent text-white'
                                                 : 'bg-surface-hover text-muted'
