@@ -15,10 +15,7 @@ const KPIStrip = ({
     weekCounts,
     openGoals,
 }: KPIStripProps) => (
-    <div
-        className="grid gap-3.5"
-        style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
-    >
+    <div className="grid gap-3.5 grid-cols-2 lg:grid-cols-4">
         <KPICard
             label="Aktive Klienten"
             value={String(activeClients)}

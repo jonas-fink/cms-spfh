@@ -135,7 +135,7 @@ export default function AdminFachkraefteListPage() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
                     <h1 className="text-[24px] font-semibold text-text tracking-[-0.02em]">
                         Fachkräfte
@@ -162,6 +162,8 @@ export default function AdminFachkraefteListPage() {
                     />
                 </div>
 
+                <div className="overflow-x-auto">
+                <div className="min-w-[780px]">
                 <div
                     className="grid gap-4 px-4 py-2.5 border-b border-border"
                     style={{ gridTemplateColumns: COLS }}
@@ -259,6 +261,8 @@ export default function AdminFachkraefteListPage() {
                         </div>
                     );
                 })}
+                </div>
+                </div>
             </Card>
 
             <Modal

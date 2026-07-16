@@ -61,13 +61,9 @@ export default function FKDashboard() {
         kpis.minutesThisWeek > 0 ? formatDuration(totalH, totalM) : '0h';
 
     return (
-        <div className="px-8 pt-7 pb-16 max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto">
             <div
-                className="grid gap-6"
-                style={{
-                    gridTemplateColumns: '1fr 320px',
-                    alignItems: 'start',
-                }}
+                className="grid gap-6 grid-cols-1 lg:grid-cols-[1fr_320px] items-start"
             >
                 <div className="flex flex-col gap-7">
                     <DashboardGreeting

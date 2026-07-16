@@ -194,7 +194,7 @@ export default function AdminDashboard() {
     return (
         <div className="px-8 pt-7 pb-16 max-w-7xl mx-auto">
             {/* Page Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
                     <h1 className="text-[24px] font-semibold text-text tracking-[-0.02em]">
                         Übersicht
@@ -207,8 +207,7 @@ export default function AdminDashboard() {
 
             {/* KPI Strip */}
             <div
-                className="grid gap-3.5 mb-7"
-                style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
+                className="grid gap-3.5 mb-7 grid-cols-2 lg:grid-cols-4"
             >
                 <KPICard
                     label="Gesamt-Auslastung"
@@ -263,8 +262,7 @@ export default function AdminDashboard() {
 
             {/* Bottom: 2-spaltig 1.4fr 1fr */}
             <div
-                className="grid gap-5"
-                style={{ gridTemplateColumns: '1.4fr 1fr' }}
+                className="grid gap-5 grid-cols-1 lg:grid-cols-[1.4fr_1fr]"
             >
                 {/* Klienten-Verteilung */}
                 <ClientDistribution

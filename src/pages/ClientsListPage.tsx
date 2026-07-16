@@ -168,113 +168,124 @@ export default function ClientsListPage() {
                     />
                 </div>
 
-                <div
-                    className="grid gap-4 px-4 py-2.5 border-b border-border"
-                    style={{ gridTemplateColumns: COLS }}
-                >
-                    {(
-                        [
-                            'Familie',
-                            'Aktenzeichen',
-                            'Tandem',
-                            'Quote',
-                            'Auslastung KW',
-                            'Status',
-                        ] as const
-                    ).map((h) => (
-                        <span
-                            key={h}
-                            className="text-[11px] font-medium text-muted uppercase tracking-widest"
-                        >
-                            {h}
-                        </span>
-                    ))}
-                </div>
-
-                {filtered.length === 0 && (
-                    <div className="px-4 py-10 text-center text-[13px] text-muted">
-                        Keine Klienten gefunden.
-                    </div>
-                )}
-
-                {filtered.map((c, i) => {
-                    const pct = utilPct(c.minutesThisWeek, c.weeklyHoursQuota);
-                    return (
+                <div className="overflow-x-auto">
+                    <div className="min-w-190">
                         <div
-                            key={c.id}
-                            onClick={() => navigate(`/clients/${c.id}`)}
-                            className={[
-                                'grid gap-4 px-4 py-3 items-center cursor-pointer hover:bg-surface-hover transition-colors duration-100',
-                                i < filtered.length - 1
-                                    ? 'border-b border-border'
-                                    : '',
-                            ]
-                                .filter(Boolean)
-                                .join(' ')}
+                            className="grid gap-4 px-4 py-2.5 border-b border-border"
                             style={{ gridTemplateColumns: COLS }}
                         >
-                            <div className="min-w-0">
-                                <div className="text-[13px] font-medium text-text truncate">
-                                    Familie {c.familyName}
-                                </div>
-                                <div className="text-[11.5px] text-muted">
-                                    {c.children.length}{' '}
-                                    {c.children.length === 1
-                                        ? 'Kind'
-                                        : 'Kinder'}
-                                </div>
-                            </div>
-
-                            <span className="text-[12.5px] text-muted font-mono truncate">
-                                {c.caseNumber || '—'}
-                            </span>
-
-                            <div className="flex items-center gap-1.5 min-w-0">
-                                {c.fkDetails.length > 1 ? (
-                                    <>
-                                        {c.fkDetails.map((u, idx) => (
-                                            <div
-                                                key={u.id ?? u._id}
-                                                className={
-                                                    idx > 0 ? '-ml-1.5' : ''
-                                                }
-                                                title={`${u.firstName} ${u.lastName}`}
-                                            >
-                                                <Avatar
-                                                    name={`${u.firstName} ${u.lastName}`}
-                                                    size={22}
-                                                    color={pickFkColor(idx)}
-                                                />
-                                            </div>
-                                        ))}
-                                        <span className="text-[11px] font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-1">
-                                            Tandem
-                                        </span>
-                                    </>
-                                ) : (
-                                    <span className="text-[12px] text-muted">
-                                        Allein
-                                    </span>
-                                )}
-                            </div>
-
-                            <span className="text-[13px] text-text tabular-nums">
-                                {c.weeklyHoursQuota}h
-                            </span>
-
-                            <div className="flex items-center gap-3">
-                                <div className="flex-1">
-                                    <UtilBar percent={pct} />
-                                </div>
-                                <span className="text-[12px] text-muted tabular-nums w-9 text-right">
-                                    {pct}%
+                            {(
+                                [
+                                    'Familie',
+                                    'Aktenzeichen',
+                                    'Tandem',
+                                    'Quote',
+                                    'Auslastung KW',
+                                    'Status',
+                                ] as const
+                            ).map((h) => (
+                                <span
+                                    key={h}
+                                    className="text-[11px] font-medium text-muted uppercase tracking-widest"
+                                >
+                                    {h}
                                 </span>
-                            </div>
-
-                            <StatusPill status={c.status} size="sm" />
+                            ))}
                         </div>
-                    );
-                })}
+
+                        {filtered.length === 0 && (
+                            <div className="px-4 py-10 text-center text-[13px] text-muted">
+                                Keine Klienten gefunden.
+                            </div>
+                        )}
+
+                        {filtered.map((c, i) => {
+                            const pct = utilPct(
+                                c.minutesThisWeek,
+                                c.weeklyHoursQuota,
+                            );
+                            return (
+                                <div
+                                    key={c.id}
+                                    onClick={() => navigate(`/clients/${c.id}`)}
+                                    className={[
+                                        'grid gap-4 px-4 py-3 items-center cursor-pointer hover:bg-surface-hover transition-colors duration-100',
+                                        i < filtered.length - 1
+                                            ? 'border-b border-border'
+                                            : '',
+                                    ]
+                                        .filter(Boolean)
+                                        .join(' ')}
+                                    style={{ gridTemplateColumns: COLS }}
+                                >
+                                    <div className="min-w-0">
+                                        <div className="text-[13px] font-medium text-text truncate">
+                                            Familie {c.familyName}
+                                        </div>
+                                        <div className="text-[11.5px] text-muted">
+                                            {c.children.length}{' '}
+                                            {c.children.length === 1
+                                                ? 'Kind'
+                                                : 'Kinder'}
+                                        </div>
+                                    </div>
+
+                                    <span className="text-[12.5px] text-muted font-mono truncate">
+                                        {c.caseNumber || '—'}
+                                    </span>
+
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                        {c.fkDetails.length > 1 ? (
+                                            <>
+                                                {c.fkDetails.map((u, idx) => (
+                                                    <div
+                                                        key={u.id ?? u._id}
+                                                        className={
+                                                            idx > 0
+                                                                ? '-ml-1.5'
+                                                                : ''
+                                                        }
+                                                        title={`${u.firstName} ${u.lastName}`}
+                                                    >
+                                                        <Avatar
+                                                            name={`${u.firstName} ${u.lastName}`}
+                                                            size={22}
+                                                            color={pickFkColor(
+                                                                idx,
+                                                            )}
+                                                        />
+                                                    </div>
+                                                ))}
+                                                <span className="text-[11px] font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-1">
+                                                    Tandem
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="text-[12px] text-muted">
+                                                Allein
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <span className="text-[13px] text-text tabular-nums">
+                                        {c.weeklyHoursQuota}h
+                                    </span>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-1">
+                                            <UtilBar percent={pct} />
+                                        </div>
+                                        <span className="text-[12px] text-muted tabular-nums w-9 text-right">
+                                            {pct}%
+                                        </span>
+                                    </div>
+
+                                    <StatusPill status={c.status} size="sm" />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
             </Card>
         </div>
     );

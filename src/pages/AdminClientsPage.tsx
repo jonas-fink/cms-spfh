@@ -187,7 +187,7 @@ export default function AdminClientsPage() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
                     <h1 className="text-[24px] font-semibold text-text tracking-[-0.02em]">
                         Klienten
@@ -224,7 +224,7 @@ export default function AdminClientsPage() {
                     placeholder="Familie oder Aktenzeichen suchen…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="h-8 px-3 rounded-md bg-bg border border-border text-[12.5px] text-text outline-none focus:border-accent w-70"
+                    className="h-8 px-3 rounded-md bg-bg border border-border text-[12.5px] text-text outline-none focus:border-accent md:w-70 w-full"
                 />
             </div>
 
@@ -237,139 +237,154 @@ export default function AdminClientsPage() {
                 </div>
 
                 {/* Header-Row */}
-                <div
-                    className="grid gap-4 px-4 py-2.5 border-b border-border"
-                    style={{ gridTemplateColumns: COLS }}
-                >
-                    {(
-                        [
-                            'Familie',
-                            'Aktenzeichen',
-                            'Fachkräfte',
-                            'Quote',
-                            'Auslastung KW',
-                            'Status',
-                            '',
-                        ] as const
-                    ).map((h, hi) => (
-                        <span
-                            key={hi}
-                            className="text-[11px] font-medium text-muted uppercase tracking-widest"
-                        >
-                            {h}
-                        </span>
-                    ))}
-                </div>
-
-                {filtered.length === 0 && (
-                    <div className="px-4 py-10 text-center text-[13px] text-muted">
-                        Keine Klienten gefunden.
-                    </div>
-                )}
-
-                {filtered.map((c, i) => {
-                    const quotaMinutes = c.weeklyHoursQuota * 60;
-                    const pct = utilPercent(c.minutesThisWeek, quotaMinutes);
-                    return (
+                <div className="overflow-x-auto">
+                    <div className="min-w-215">
                         <div
-                            key={c.id}
-                            onClick={() => navigate(`/admin/clients/${c.id}`)}
-                            className={[
-                                'grid gap-4 px-4 py-3 items-center cursor-pointer hover:bg-surface-hover transition-colors duration-100',
-                                i < filtered.length - 1
-                                    ? 'border-b border-border'
-                                    : '',
-                            ]
-                                .filter(Boolean)
-                                .join(' ')}
+                            className="grid gap-4 px-4 py-2.5 border-b border-border"
                             style={{ gridTemplateColumns: COLS }}
                         >
-                            <div className="min-w-0">
-                                <div className="text-[13px] font-medium text-text truncate">
-                                    Familie {c.familyName}
-                                </div>
-                                <div className="text-[11.5px] text-muted">
-                                    {c.children.length}{' '}
-                                    {c.children.length === 1
-                                        ? 'Kind'
-                                        : 'Kinder'}
-                                </div>
-                            </div>
-
-                            <span className="text-[12.5px] text-muted font-mono truncate">
-                                {c.caseNumber || '—'}
-                            </span>
-
-                            <div className="flex items-center gap-1.5 min-w-0">
-                                {c._fkDetails.map((u, idx) => (
-                                    <div
-                                        key={u.id ?? u._id}
-                                        className={idx > 0 ? '-ml-1.5' : ''}
-                                        title={`${u.firstName} ${u.lastName}`}
-                                    >
-                                        <Avatar
-                                            name={`${u.firstName} ${u.lastName}`}
-                                            size={22}
-                                            color={pickFkColor(idx)}
-                                        />
-                                    </div>
-                                ))}
-                                {c._fkDetails.length === 0 && (
-                                    <span className="text-[12px] text-muted">
-                                        —
-                                    </span>
-                                )}
-                                {c._fkDetails.length > 1 && (
-                                    <span className="text-[11px] font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-1">
-                                        Tandem
-                                    </span>
-                                )}
-                            </div>
-
-                            <span className="text-[13px] text-text tabular-nums">
-                                {c.weeklyHoursQuota}h
-                            </span>
-
-                            <div className="flex items-center gap-3">
-                                <div className="flex-1">
-                                    <UtilBar percent={pct} />
-                                </div>
-                                <span className="text-[12px] text-muted tabular-nums w-9 text-right">
-                                    {pct}%
+                            {(
+                                [
+                                    'Familie',
+                                    'Aktenzeichen',
+                                    'Fachkräfte',
+                                    'Quote',
+                                    'Auslastung KW',
+                                    'Status',
+                                    '',
+                                ] as const
+                            ).map((h, hi) => (
+                                <span
+                                    key={hi}
+                                    className="text-[11px] font-medium text-muted uppercase tracking-widest"
+                                >
+                                    {h}
                                 </span>
-                            </div>
-
-                            <StatusPill status={c.status} size="sm" />
-
-                            <div className="flex gap-0.5 justify-end">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        openEdit(c);
-                                    }}
-                                    className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100"
-                                    title="Bearbeiten"
-                                >
-                                    <Icon name="edit" size={14} stroke={1.75} />
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleArchive(c);
-                                    }}
-                                    className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover hover:text-red-600 transition-colors duration-100"
-                                    title="Archivieren"
-                                >
-                                    <Icon
-                                        name="trash"
-                                        size={14}
-                                        stroke={1.75}
-                                    />
-                                </button>
-                            </div>
+                            ))}
                         </div>
-                    );
-                })}
+
+                        {filtered.length === 0 && (
+                            <div className="px-4 py-10 text-center text-[13px] text-muted">
+                                Keine Klienten gefunden.
+                            </div>
+                        )}
+
+                        {filtered.map((c, i) => {
+                            const quotaMinutes = c.weeklyHoursQuota * 60;
+                            const pct = utilPercent(
+                                c.minutesThisWeek,
+                                quotaMinutes,
+                            );
+                            return (
+                                <div
+                                    key={c.id}
+                                    onClick={() =>
+                                        navigate(`/admin/clients/${c.id}`)
+                                    }
+                                    className={[
+                                        'grid gap-4 px-4 py-3 items-center cursor-pointer hover:bg-surface-hover transition-colors duration-100',
+                                        i < filtered.length - 1
+                                            ? 'border-b border-border'
+                                            : '',
+                                    ]
+                                        .filter(Boolean)
+                                        .join(' ')}
+                                    style={{ gridTemplateColumns: COLS }}
+                                >
+                                    <div className="min-w-0">
+                                        <div className="text-[13px] font-medium text-text truncate">
+                                            Familie {c.familyName}
+                                        </div>
+                                        <div className="text-[11.5px] text-muted">
+                                            {c.children.length}{' '}
+                                            {c.children.length === 1
+                                                ? 'Kind'
+                                                : 'Kinder'}
+                                        </div>
+                                    </div>
+
+                                    <span className="text-[12.5px] text-muted font-mono truncate">
+                                        {c.caseNumber || '—'}
+                                    </span>
+
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                        {c._fkDetails.map((u, idx) => (
+                                            <div
+                                                key={u.id ?? u._id}
+                                                className={
+                                                    idx > 0 ? '-ml-1.5' : ''
+                                                }
+                                                title={`${u.firstName} ${u.lastName}`}
+                                            >
+                                                <Avatar
+                                                    name={`${u.firstName} ${u.lastName}`}
+                                                    size={22}
+                                                    color={pickFkColor(idx)}
+                                                />
+                                            </div>
+                                        ))}
+                                        {c._fkDetails.length === 0 && (
+                                            <span className="text-[12px] text-muted">
+                                                —
+                                            </span>
+                                        )}
+                                        {c._fkDetails.length > 1 && (
+                                            <span className="text-[11px] font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-1">
+                                                Tandem
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <span className="text-[13px] text-text tabular-nums">
+                                        {c.weeklyHoursQuota}h
+                                    </span>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-1">
+                                            <UtilBar percent={pct} />
+                                        </div>
+                                        <span className="text-[12px] text-muted tabular-nums w-9 text-right">
+                                            {pct}%
+                                        </span>
+                                    </div>
+
+                                    <StatusPill status={c.status} size="sm" />
+
+                                    <div className="flex gap-0.5 justify-end">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openEdit(c);
+                                            }}
+                                            className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100"
+                                            title="Bearbeiten"
+                                        >
+                                            <Icon
+                                                name="edit"
+                                                size={14}
+                                                stroke={1.75}
+                                            />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleArchive(c);
+                                            }}
+                                            className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover hover:text-red-600 transition-colors duration-100"
+                                            title="Archivieren"
+                                        >
+                                            <Icon
+                                                name="trash"
+                                                size={14}
+                                                stroke={1.75}
+                                            />
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
             </Card>
 
             <Modal

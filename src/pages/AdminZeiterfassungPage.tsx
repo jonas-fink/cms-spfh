@@ -87,7 +87,7 @@ export default function AdminZeiterfassungPage() {
                         Lade…
                     </div>
                 ) : (
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-border overflow-x-auto min-w-0 [&>*]:min-w-[520px]">
                         <div className="px-4 py-2 grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-2 text-[11px] text-muted uppercase font-medium">
                             <span>Fachkraft</span>
                             <span>Status</span>

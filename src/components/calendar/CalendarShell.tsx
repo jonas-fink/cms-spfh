@@ -208,7 +208,7 @@ export default function CalendarShell() {
 
     return (
         <div>
-            <div className="mb-5 flex items-end justify-between gap-4">
+            <div className="mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-[24px] font-semibold text-text tracking-[-0.02em]">
                         Einsatzplaner
@@ -249,7 +249,7 @@ export default function CalendarShell() {
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
                 <FilterBtn
                     label="Mein Kalender"
                     active={scope === 'mine'}

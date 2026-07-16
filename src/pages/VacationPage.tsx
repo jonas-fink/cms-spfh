@@ -79,7 +79,7 @@ export default function VacationPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 my-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
                 <KPICard
                     label="Resturlaub"
                     value={`${balance?.remainingDays ?? 0} Tg`}

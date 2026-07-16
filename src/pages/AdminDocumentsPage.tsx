@@ -229,6 +229,8 @@ export default function AdminDocumentsPage() {
                     />
                 </div>
 
+                <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
                 <div
                     className="grid gap-4 px-4 py-2.5 border-b border-border"
                     style={{ gridTemplateColumns: COLS }}
@@ -353,6 +355,8 @@ export default function AdminDocumentsPage() {
                         </span>
                     </div>
                 ))}
+                </div>
+                </div>
             </Card>
         </div>
     );

@@ -212,7 +212,7 @@ export default function DocumentsPage() {
                     placeholder="Datei, Beschreibung suchen…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="h-8 px-3 rounded-md bg-bg border border-border text-[12.5px] text-text outline-none focus:border-accent w-70"
+                    className="h-8 px-3 rounded-md bg-bg border border-border text-[12.5px] text-text outline-none focus:border-accent md:w-70 w-full"
                 />
             </div>
 
@@ -224,104 +224,114 @@ export default function DocumentsPage() {
                     />
                 </div>
 
-                <div
-                    className="grid gap-4 px-4 py-2.5 border-b border-border"
-                    style={{ gridTemplateColumns: COLS }}
-                >
-                    {(
-                        [
-                            'Datei',
-                            'Klient',
-                            'Typ',
-                            'Hochgeladen',
-                            'Größe',
-                        ] as const
-                    ).map((h) => (
-                        <span
-                            key={h}
-                            className="text-[11px] font-medium text-muted uppercase tracking-widest"
-                        >
-                            {h}
-                        </span>
-                    ))}
-                </div>
-
-                {filtered.length === 0 && (
-                    <div className="px-4 py-10 text-center text-[13px] text-muted">
-                        Keine Dokumente gefunden.
-                    </div>
-                )}
-
-                {filtered.map((d, i) => (
-                    <div
-                        key={d.id}
-                        className={[
-                            'grid gap-4 px-4 py-3 items-center',
-                            i < filtered.length - 1
-                                ? 'border-b border-border'
-                                : '',
-                        ]
-                            .filter(Boolean)
-                            .join(' ')}
-                        style={{ gridTemplateColumns: COLS }}
-                    >
-                        <a
-                            href={d.downloadUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2.5 min-w-0 no-underline group"
-                            title={d.description || d.fileName}
-                        >
-                            <div
-                                className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
-                                style={{
-                                    background:
-                                        d.fileType === 'pdf'
-                                            ? 'rgba(220,38,38,0.08)'
-                                            : 'rgba(37,99,235,0.08)',
-                                    color:
-                                        d.fileType === 'pdf'
-                                            ? '#dc2626'
-                                            : '#2563eb',
-                                }}
-                            >
-                                <Icon
-                                    name={d.fileType === 'pdf' ? 'pdf' : 'file'}
-                                    size={14}
-                                />
-                            </div>
-                            <div className="min-w-0">
-                                <div className="text-[13px] font-medium text-text truncate group-hover:text-accent">
-                                    {d.fileName}
-                                </div>
-                                {d.description && (
-                                    <div className="text-[11.5px] text-muted truncate">
-                                        {d.description}
-                                    </div>
-                                )}
-                            </div>
-                        </a>
-
+                <div className="overflow-x-auto">
+                    <div className="min-w-180">
                         <div
-                            className="text-[13px] text-text truncate cursor-pointer hover:text-accent"
-                            onClick={() => navigate(`/clients/${d.clientId}`)}
+                            className="grid gap-4 px-4 py-2.5 border-b border-border"
+                            style={{ gridTemplateColumns: COLS }}
                         >
-                            Familie {d.clientFamilyName}
+                            {(
+                                [
+                                    'Datei',
+                                    'Klient',
+                                    'Typ',
+                                    'Hochgeladen',
+                                    'Größe',
+                                ] as const
+                            ).map((h) => (
+                                <span
+                                    key={h}
+                                    className="text-[11px] font-medium text-muted uppercase tracking-widest"
+                                >
+                                    {h}
+                                </span>
+                            ))}
                         </div>
 
-                        <span className="text-[11.5px] font-medium uppercase text-muted tabular-nums">
-                            {d.fileType}
-                        </span>
+                        {filtered.length === 0 && (
+                            <div className="px-4 py-10 text-center text-[13px] text-muted">
+                                Keine Dokumente gefunden.
+                            </div>
+                        )}
 
-                        <span className="text-[12.5px] text-muted tabular-nums">
-                            {formatDate(d.createdAt)}
-                        </span>
+                        {filtered.map((d, i) => (
+                            <div
+                                key={d.id}
+                                className={[
+                                    'grid gap-4 px-4 py-3 items-center',
+                                    i < filtered.length - 1
+                                        ? 'border-b border-border'
+                                        : '',
+                                ]
+                                    .filter(Boolean)
+                                    .join(' ')}
+                                style={{ gridTemplateColumns: COLS }}
+                            >
+                                <a
+                                    href={d.downloadUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2.5 min-w-0 no-underline group"
+                                    title={d.description || d.fileName}
+                                >
+                                    <div
+                                        className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
+                                        style={{
+                                            background:
+                                                d.fileType === 'pdf'
+                                                    ? 'rgba(220,38,38,0.08)'
+                                                    : 'rgba(37,99,235,0.08)',
+                                            color:
+                                                d.fileType === 'pdf'
+                                                    ? '#dc2626'
+                                                    : '#2563eb',
+                                        }}
+                                    >
+                                        <Icon
+                                            name={
+                                                d.fileType === 'pdf'
+                                                    ? 'pdf'
+                                                    : 'file'
+                                            }
+                                            size={14}
+                                        />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="text-[13px] font-medium text-text truncate group-hover:text-accent">
+                                            {d.fileName}
+                                        </div>
+                                        {d.description && (
+                                            <div className="text-[11.5px] text-muted truncate">
+                                                {d.description}
+                                            </div>
+                                        )}
+                                    </div>
+                                </a>
 
-                        <span className="text-[12.5px] text-muted tabular-nums">
-                            {formatFileSize(d.fileSizeBytes)}
-                        </span>
+                                <div
+                                    className="text-[13px] text-text truncate cursor-pointer hover:text-accent"
+                                    onClick={() =>
+                                        navigate(`/clients/${d.clientId}`)
+                                    }
+                                >
+                                    Familie {d.clientFamilyName}
+                                </div>
+
+                                <span className="text-[11.5px] font-medium uppercase text-muted tabular-nums">
+                                    {d.fileType}
+                                </span>
+
+                                <span className="text-[12.5px] text-muted tabular-nums">
+                                    {formatDate(d.createdAt)}
+                                </span>
+
+                                <span className="text-[12.5px] text-muted tabular-nums">
+                                    {formatFileSize(d.fileSizeBytes)}
+                                </span>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
             </Card>
         </div>
     );

@@ -1,7 +1,13 @@
+import { useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useLocation } from 'react-router';
 import Icon, { type IconName } from './Icon';
 import Avatar from './Avatar';
+
+interface SidebarProps {
+    open: boolean;
+    onClose: () => void;
+}
 
 interface NavItem {
     path: string;
@@ -32,13 +38,36 @@ const adminNav: NavItem[] = [
     { path: '/admin/library', label: 'Wissensbasis', icon: 'books' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ open, onClose }: SidebarProps) {
     const { user, logout } = useAuth();
     const { pathname } = useLocation();
     const nav = user?.role === 'admin' ? adminNav : fkNav;
 
+    // Esc schließt die Drawer (nur relevant, wenn mobil geöffnet).
+    useEffect(() => {
+        if (!open) return;
+        const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [open, onClose]);
+
     return (
-        <aside className="w-60 min-w-60 h-screen sticky top-0 flex flex-col bg-surface border-r border-border overflow-y-auto">
+        <>
+            {/* Backdrop (nur mobil, wenn offen) */}
+            {open && (
+                <button
+                    type="button"
+                    aria-label="Menü schließen"
+                    onClick={onClose}
+                    className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+                />
+            )}
+            <aside
+                className={`w-60 min-w-60 h-screen flex flex-col bg-surface border-r border-border overflow-y-auto
+                    fixed inset-y-0 left-0 z-50 transition-transform duration-200
+                    lg:sticky lg:top-0 lg:z-auto lg:translate-x-0
+                    ${open ? 'translate-x-0' : '-translate-x-full'}`}
+            >
             {/* Logo */}
             <div className="h-14 flex items-center px-5 border-b border-border shrink-0">
                 <div className="w-7 h-7 rounded-[7px] bg-accent flex items-center justify-center mr-2.5">
@@ -59,6 +88,7 @@ export default function Sidebar() {
                         <Link
                             key={item.path}
                             to={item.path}
+                            onClick={onClose}
                             className={`
                 flex items-center gap-2.25 px-2.5 py-1.75 rounded-md text-[13px]
                 transition-colors duration-100 mb-px no-underline
@@ -108,5 +138,6 @@ export default function Sidebar() {
                 </button>
             </div>
         </aside>
+        </>
     );
 }
