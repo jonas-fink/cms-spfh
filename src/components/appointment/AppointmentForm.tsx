@@ -88,6 +88,26 @@ export default function AppointmentForm({
             prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
         );
     }
+
+    // Auswählbare Teilnehmer = zugewiesene FKs ohne die aktuelle FK (Ersteller)
+    const selectableFks = assignedFachkraefte.filter(
+        (fk) => fk._id !== user?.id,
+    );
+    const allSelected =
+        selectableFks.length > 0 &&
+        selectableFks.every((fk) => participantIds.includes(fk._id));
+    function toggleAllParticipants() {
+        setParticipantIds(allSelected ? [] : selectableFks.map((fk) => fk._id));
+    }
+
+    function handleStatusChange(next: AppointmentStatus) {
+        setStatus(next);
+        // Ausgefallene Termine werden pauschal mit 90 Min. angesetzt.
+        if (next === 'ausgefallen') {
+            setDurationHours(1);
+            setDurationMinutes(30);
+        }
+    }
     const [error, setError] = useState<string | null>(null);
 
     async function handleSubmit(e: FormEvent) {
@@ -158,7 +178,9 @@ export default function AppointmentForm({
                     <select
                         value={status}
                         onChange={(e) =>
-                            setStatus(e.target.value as AppointmentStatus)
+                            handleStatusChange(
+                                e.target.value as AppointmentStatus,
+                            )
                         }
                         className="h-9 px-2.5 rounded-md bg-bg border border-border text-[13px] text-text focus:outline-none focus:border-border-strong"
                     >
@@ -242,31 +264,38 @@ export default function AppointmentForm({
 
             {assignedFachkraefte.length > 0 && (
                 <div className="flex flex-col gap-1.5">
-                    <span className="text-[11.5px] text-muted font-medium">
-                        Tandem-Teilnehmer (optional)
-                    </span>
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11.5px] text-muted font-medium">
+                            Tandem-Teilnehmer (optional)
+                        </span>
+                        {selectableFks.length > 0 && (
+                            <button
+                                type="button"
+                                onClick={toggleAllParticipants}
+                                className="text-[11px] text-accent hover:underline cursor-pointer"
+                            >
+                                {allSelected ? 'Keine' : 'Alle auswählen'}
+                            </button>
+                        )}
+                    </div>
                     <div className="flex flex-wrap gap-1.5">
-                        {assignedFachkraefte
-                            .filter((fk) => fk._id !== user?.id)
-                            .map((fk) => {
-                                const active = participantIds.includes(fk._id);
-                                return (
-                                    <button
-                                        key={fk._id}
-                                        type="button"
-                                        onClick={() =>
-                                            toggleParticipant(fk._id)
-                                        }
-                                        className={`px-2 py-1 rounded-md border text-[11.5px] cursor-pointer transition-colors ${
-                                            active
-                                                ? 'bg-accent text-white border-accent'
-                                                : 'bg-surface text-muted border-border hover:border-border-strong'
-                                        }`}
-                                    >
-                                        {fk.firstName} {fk.lastName}
-                                    </button>
-                                );
-                            })}
+                        {selectableFks.map((fk) => {
+                            const active = participantIds.includes(fk._id);
+                            return (
+                                <button
+                                    key={fk._id}
+                                    type="button"
+                                    onClick={() => toggleParticipant(fk._id)}
+                                    className={`px-2 py-1 rounded-md border text-[11.5px] cursor-pointer transition-colors ${
+                                        active
+                                            ? 'bg-accent text-white border-accent'
+                                            : 'bg-surface text-muted border-border hover:border-border-strong'
+                                    }`}
+                                >
+                                    {fk.firstName} {fk.lastName}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             )}
