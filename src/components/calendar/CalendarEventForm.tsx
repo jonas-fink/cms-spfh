@@ -213,6 +213,25 @@ export default function CalendarEventForm({
                             Keine weiteren Nutzer verfügbar
                         </span>
                     )}
+                    {otherUsers.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setParticipantIds((prev) =>
+                                    prev.length === otherUsers.length
+                                        ? []
+                                        : otherUsers.map((u) => u.id),
+                                )
+                            }
+                            className={`px-2 py-1 rounded-md border text-[11.5px] cursor-pointer transition-colors ${
+                                participantIds.length === otherUsers.length
+                                    ? 'bg-accent text-white border-accent'
+                                    : 'bg-surface text-muted border-border hover:border-border-strong'
+                            }`}
+                        >
+                            Alle
+                        </button>
+                    )}
                     {otherUsers.map((u) => {
                         const active = participantIds.includes(u.id);
                         return (

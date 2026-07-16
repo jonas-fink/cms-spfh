@@ -45,7 +45,7 @@ export default function Sidebar() {
                     <Icon name="sparkle" size={14} color="#fff" />
                 </div>
                 <span className="text-[14px] font-semibold text-text tracking-[-0.01em]">
-                    SPFH
+                    CMS-SPFH
                 </span>
             </div>
 

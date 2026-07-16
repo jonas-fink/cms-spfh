@@ -132,8 +132,8 @@ export function TabTermine({
                                                 size="sm"
                                             />
                                         </td>
-                                        <td className="px-4 py-3 max-w-[260px]">
-                                            <p className="text-[12.5px] text-muted leading-[1.5] m-0 line-clamp-2">
+                                        <td className="px-4 py-3 max-w-65">
+                                            <p className="text-[12.5px] text-muted leading-normal m-0 line-clamp-2">
                                                 {appt.report || '—'}
                                             </p>
                                         </td>

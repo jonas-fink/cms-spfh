@@ -35,7 +35,7 @@ export default function NotificationBell() {
         <div className="relative" ref={wrapRef}>
             <button
                 onClick={() => setOpen((o) => !o)}
-                className="relative text-muted hover:text-text p-1.5 rounded-md transition-colors"
+                className="relative text-muted hover:text-text p-1.5 rounded-md transition-colors cursor-pointer"
                 aria-label="Benachrichtigungen"
             >
                 <Icon name="bell" size={17} />
