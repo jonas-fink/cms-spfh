@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
     Avatar,
     Card,
+    HoursRing,
     KPICard,
     SectionHeader,
     UtilBar,
@@ -142,92 +143,48 @@ export default function AdminStatsPage() {
                     sub="Geleistete vs. vereinbarte Wochenstunden pro Fachkraft"
                 />
                 <Card>
-                    <div
-                        className="p-5 flex items-end gap-4"
-                        style={{ height: 220 }}
-                    >
-                        {workload.length === 0 && (
-                            <div className="flex-1 text-center text-[13px] text-muted">
-                                Keine Daten vorhanden.
-                            </div>
-                        )}
-                        {workload.map((w, i) => {
-                            const heightPct = Math.max(
-                                (w.workedMinutes / totals.maxWorked) * 100,
-                                w.workedMinutes > 0 ? 6 : 0,
-                            );
-                            const quotaPct = Math.max(
-                                (w.quotaMinutes / totals.maxWorked) * 100,
-                                w.quotaMinutes > 0 ? 6 : 0,
-                            );
-                            const color = FK_COLORS[i % FK_COLORS.length];
-                            const firstName = w.fachkraft.name.split(' ')[0];
-                            return (
-                                <div
-                                    key={w.fachkraft.id}
-                                    className="flex-1 flex flex-col items-center gap-2"
-                                    style={{ minWidth: 0 }}
-                                >
+                    {workload.length === 0 ? (
+                        <div className="p-5 text-center text-[13px] text-muted">
+                            Keine Daten vorhanden.
+                        </div>
+                    ) : (
+                        <div className="p-5 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-5">
+                            {workload.map((w, i) => {
+                                const color = FK_COLORS[i % FK_COLORS.length];
+                                const firstName =
+                                    w.fachkraft.name.split(' ')[0];
+                                return (
                                     <div
-                                        className="w-full flex items-end justify-center gap-1.5"
-                                        style={{ height: 160 }}
+                                        key={w.fachkraft.id}
+                                        className="flex flex-col items-center gap-2 min-w-0"
+                                        title={`Geleistet ${fmtHours(w.workedMinutes)} · Soll ${fmtHours(w.quotaMinutes)}`}
                                     >
-                                        <div
-                                            className="w-4 rounded-sm transition-all duration-500"
-                                            style={{
-                                                height: `${heightPct}%`,
-                                                background: color,
-                                                minHeight: 2,
-                                            }}
-                                            title={`Geleistet: ${fmtHours(w.workedMinutes)}`}
+                                        <HoursRing
+                                            minutes={w.workedMinutes}
+                                            quotaHours={w.quotaMinutes / 60}
+                                            size={76}
                                         />
-                                        <div
-                                            className="w-4 rounded-sm transition-all duration-500"
-                                            style={{
-                                                height: `${quotaPct}%`,
-                                                background:
-                                                    'var(--border-strong)',
-                                                opacity: 0.5,
-                                                minHeight: 2,
-                                            }}
-                                            title={`Soll: ${fmtHours(w.quotaMinutes)}`}
-                                        />
+                                        <div className="flex flex-col items-center gap-1 min-w-0 w-full">
+                                            <Avatar
+                                                name={w.fachkraft.name}
+                                                size={22}
+                                                color={color}
+                                            />
+                                            <span className="text-[11.5px] text-text font-medium truncate w-full text-center">
+                                                {firstName}
+                                            </span>
+                                            <span className="text-[10.5px] text-muted tabular-nums">
+                                                {w.utilizationPercent}%
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col items-center gap-1 min-w-0 w-full">
-                                        <Avatar
-                                            name={w.fachkraft.name}
-                                            size={22}
-                                            color={color}
-                                        />
-                                        <span className="text-[11.5px] text-text font-medium truncate w-full text-center">
-                                            {firstName}
-                                        </span>
-                                        <span className="text-[10.5px] text-muted tabular-nums">
-                                            {w.utilizationPercent}%
-                                        </span>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div className="px-5 py-3 border-t border-border flex items-center gap-4 text-[11.5px] text-muted">
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="w-2.5 h-2.5 rounded-sm"
-                                style={{ background: FK_COLORS[0] }}
-                            />
-                            Geleistet (inkl. Ausfall-Gutschrift)
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="w-2.5 h-2.5 rounded-sm"
-                                style={{
-                                    background: 'var(--border-strong)',
-                                    opacity: 0.5,
-                                }}
-                            />
-                            Wochen-Soll
-                        </span>
+                                );
+                            })}
+                        </div>
+                    )}
+                    <div className="px-5 py-3 border-t border-border text-[11.5px] text-muted">
+                        Ring = geleistete Stunden (inkl. Ausfall-Gutschrift) im
+                        Verhältnis zum Wochen-Soll.
                     </div>
                 </Card>
             </div>

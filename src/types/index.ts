@@ -18,6 +18,7 @@ export type GoalStatus = 'offen' | 'in Bearbeitung' | 'erreicht';
 export interface Client {
     id: string;
     familyName: string;
+    firstName?: string;
     caseNumber: string;
     address?: string;
     phone?: string;
@@ -121,7 +122,11 @@ export interface ApiClient {
     _id: string;
     id?: string;
     familyName: string;
+    firstName?: string;
     caseNumber: string;
+    address?: string;
+    phone?: string;
+    jugendamtContact?: string;
     assignedFachkraefte: PopulatedUser[];
     weeklyHoursQuota: number;
     status: ClientStatus;

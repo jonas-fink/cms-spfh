@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'react-router';
 import {
     ClientDetailHeader,
+    ClientForm,
     TabUebersicht,
     TabVerlauf,
 } from '../components/client';
@@ -10,7 +11,7 @@ import { TabDokumente } from '../components/document';
 import type { TabDokumenteHandle } from '../components/document/TabDokumente';
 import { TabHilfePlan } from '../components/hilfeplan';
 import { AdminClientEdit } from '../components/admin';
-import { Modal } from '../components/shared';
+import { Button, Modal } from '../components/shared';
 import { api } from '../utils/api';
 import {
     getCurrentWeekDays,
@@ -82,6 +83,7 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
     const [error, setError] = useState<string | null>(null);
     const [apptModalOpen, setApptModalOpen] = useState(false);
     const [editAppt, setEditAppt] = useState<Appointment | null>(null);
+    const [clientEditOpen, setClientEditOpen] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
     const docsRef = useRef<TabDokumenteHandle>(null);
 
@@ -317,6 +319,7 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
                 const normalizedClient: Client = {
                     id: apiClient.id ?? apiClient._id,
                     familyName: apiClient.familyName,
+                    firstName: apiClient.firstName,
                     caseNumber: apiClient.caseNumber,
                     address: apiClient.address,
                     phone: apiClient.phone,
@@ -461,12 +464,26 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
 
             <div className="px-8 pt-6 pb-16 max-w-7xl mx-auto">
                 {activeTab === 'uebersicht' && (
-                    <TabUebersicht
-                        client={client}
-                        appointments={appointments}
-                        hilfeplan={hilfeplan}
-                        fkMap={fkMap}
-                    />
+                    <>
+                        {!isAdmin && (
+                            <div className="flex justify-end mb-3">
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    icon="edit"
+                                    onClick={() => setClientEditOpen(true)}
+                                >
+                                    Stammdaten bearbeiten
+                                </Button>
+                            </div>
+                        )}
+                        <TabUebersicht
+                            client={client}
+                            appointments={appointments}
+                            hilfeplan={hilfeplan}
+                            fkMap={fkMap}
+                        />
+                    </>
                 )}
                 {activeTab === 'termine' && (
                     <TabTermine
@@ -521,6 +538,39 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
                     assignedFachkraefte={assignedFKs}
                     onSuccess={handleApptSaved}
                     onCancel={() => setApptModalOpen(false)}
+                />
+            </Modal>
+
+            <Modal
+                open={clientEditOpen}
+                onClose={() => setClientEditOpen(false)}
+                title={`Familie ${client.familyName} – Stammdaten`}
+            >
+                <ClientForm
+                    mode="edit"
+                    initial={{
+                        id: client.id,
+                        familyName: client.familyName,
+                        firstName: client.firstName,
+                        caseNumber: client.caseNumber,
+                        address: client.address,
+                        phone: client.phone,
+                        jugendamtContact: client.jugendamtContact,
+                        children: client.children,
+                    }}
+                    editableFields={[
+                        'familyName',
+                        'caseNumber',
+                        'children',
+                        'address',
+                        'phone',
+                        'jugendamtContact',
+                    ]}
+                    onSuccess={() => {
+                        setClientEditOpen(false);
+                        setReloadKey((k) => k + 1);
+                    }}
+                    onCancel={() => setClientEditOpen(false)}
                 />
             </Modal>
 

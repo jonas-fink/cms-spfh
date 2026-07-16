@@ -2,12 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
     Avatar,
+    Button,
     Card,
+    Icon,
+    Modal,
     SectionHeader,
     StatusPill,
     UtilBar,
     FilterBtn,
 } from '../components/shared';
+import { ClientForm } from '../components/client';
+import type { ClientFormInitial } from '../components/client/ClientForm';
 import { api } from '../utils/api';
 import { pickFkColor } from '../utils/colors';
 import type {
@@ -46,6 +51,9 @@ export default function AdminClientsPage() {
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [reloadKey, setReloadKey] = useState(0);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editing, setEditing] = useState<ClientFormInitial | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -76,7 +84,11 @@ export default function AdminClientsPage() {
                 const mapped = apiClients.map((c, i) => ({
                     id: c.id ?? c._id,
                     familyName: c.familyName,
+                    firstName: c.firstName,
                     caseNumber: c.caseNumber,
+                    address: c.address,
+                    phone: c.phone,
+                    jugendamtContact: c.jugendamtContact,
                     assignedFachkraefte: c.assignedFachkraefte.map(
                         (u) => u.id ?? u._id,
                     ),
@@ -100,7 +112,47 @@ export default function AdminClientsPage() {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [reloadKey]);
+
+    function openCreate() {
+        setEditing(null);
+        setModalOpen(true);
+    }
+    function openEdit(c: (typeof clients)[number]) {
+        setEditing({
+            id: c.id,
+            familyName: c.familyName,
+            firstName: c.firstName,
+            caseNumber: c.caseNumber,
+            address: c.address,
+            phone: c.phone,
+            jugendamtContact: c.jugendamtContact,
+            weeklyHoursQuota: c.weeklyHoursQuota,
+            status: c.status,
+            startDate: c.startDate,
+            children: c.children,
+        });
+        setModalOpen(true);
+    }
+    async function handleArchive(c: (typeof clients)[number]) {
+        if (
+            !confirm(
+                `Familie ${c.familyName} archivieren? Der Klient wird auf „abgeschlossen“ gesetzt (Verlauf bleibt erhalten).`,
+            )
+        )
+            return;
+        try {
+            await api.patch(`/clients/${c.id}`, { status: 'abgeschlossen' });
+            setReloadKey((k) => k + 1);
+        } catch (err) {
+            alert((err as Error).message);
+        }
+    }
+    function handleSuccess() {
+        setModalOpen(false);
+        setEditing(null);
+        setReloadKey((k) => k + 1);
+    }
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -131,7 +183,7 @@ export default function AdminClientsPage() {
         );
     }
 
-    const COLS = '2fr 1fr 1.4fr 80px 1.2fr 100px';
+    const COLS = '2fr 1fr 1.4fr 80px 1.2fr 100px 80px';
 
     return (
         <div>
@@ -146,6 +198,14 @@ export default function AdminClientsPage() {
                         aktiv
                     </p>
                 </div>
+                <Button
+                    variant="primary"
+                    size="sm"
+                    icon="plus"
+                    onClick={openCreate}
+                >
+                    Neuer Klient
+                </Button>
             </div>
 
             {/* Filter + Search */}
@@ -189,10 +249,11 @@ export default function AdminClientsPage() {
                             'Quote',
                             'Auslastung KW',
                             'Status',
+                            '',
                         ] as const
-                    ).map((h) => (
+                    ).map((h, hi) => (
                         <span
-                            key={h}
+                            key={hi}
                             className="text-[11px] font-medium text-muted uppercase tracking-widest"
                         >
                             {h}
@@ -279,10 +340,54 @@ export default function AdminClientsPage() {
                             </div>
 
                             <StatusPill status={c.status} size="sm" />
+
+                            <div className="flex gap-0.5 justify-end">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEdit(c);
+                                    }}
+                                    className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover transition-colors duration-100"
+                                    title="Bearbeiten"
+                                >
+                                    <Icon name="edit" size={14} stroke={1.75} />
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleArchive(c);
+                                    }}
+                                    className="bg-transparent border-none cursor-pointer text-muted p-1.5 rounded-md hover:bg-surface-hover hover:text-red-600 transition-colors duration-100"
+                                    title="Archivieren"
+                                >
+                                    <Icon
+                                        name="trash"
+                                        size={14}
+                                        stroke={1.75}
+                                    />
+                                </button>
+                            </div>
                         </div>
                     );
                 })}
             </Card>
+
+            <Modal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                title={
+                    editing
+                        ? `Familie ${editing.familyName} bearbeiten`
+                        : 'Neuer Klient'
+                }
+            >
+                <ClientForm
+                    mode={editing ? 'edit' : 'create'}
+                    initial={editing ?? undefined}
+                    onSuccess={handleSuccess}
+                    onCancel={() => setModalOpen(false)}
+                />
+            </Modal>
         </div>
     );
 }
