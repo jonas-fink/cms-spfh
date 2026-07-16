@@ -46,7 +46,7 @@ export function TabHilfePlan({ hilfeplan, onGoalsChange }: TabHilfePlanProps) {
     };
 
     return (
-        <div className="grid grid-cols-[1fr_280px] gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5">
             {/* Links */}
             <div className="flex flex-col gap-4">
                 <Card>

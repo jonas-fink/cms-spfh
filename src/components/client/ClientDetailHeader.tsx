@@ -28,7 +28,8 @@ export function ClientDetailHeader({
 }: ClientDetailHeaderProps) {
     const navigate = useNavigate();
     const backTo = mode === 'admin' ? '/admin/clients' : '/clients';
-    const backLabel = mode === 'admin' ? 'Alle Klienten (Admin)' : 'Alle Klienten';
+    const backLabel =
+        mode === 'admin' ? 'Alle Klienten (Admin)' : 'Alle Klienten';
     const isTandem = client.assignedFachkraefte.length > 1;
     const minutesH = Math.floor(client.minutesThisWeek / 60);
     const minutesM = client.minutesThisWeek % 60;
@@ -105,7 +106,7 @@ export function ClientDetailHeader({
                         >
                             Neuer Termin
                         </Button>
-                        <button className="w-[30px] h-[30px] rounded-[7px] border border-border bg-surface flex items-center justify-center cursor-pointer text-muted hover:bg-surface-hover transition-colors duration-100">
+                        <button className="w-7.5 h-7.5 rounded-[7px] border border-border bg-surface flex items-center justify-center cursor-pointer text-muted hover:bg-surface-hover transition-colors duration-100">
                             <Icon name="moreH" size={15} stroke={1.75} />
                         </button>
                     </div>
@@ -120,7 +121,7 @@ export function ClientDetailHeader({
             </div>
 
             {/* Quick-Stats Strip */}
-            <div className="flex items-center border-t border-border py-2.5">
+            <div className="flex flex-wrap items-center border-t border-border py-2.5 gap-y-2">
                 {/* Stunden KW */}
                 <div className="flex items-center gap-2.5 pr-6">
                     <HoursRing
@@ -147,7 +148,7 @@ export function ClientDetailHeader({
                 <div className="w-px h-8 bg-border mx-6" />
 
                 {/* Betreuung */}
-                <div className="pr-6">
+                <div className="pr-6 hidden md:flex md:flex-col">
                     <div className="text-[11px] font-medium text-muted uppercase tracking-[0.04em] mb-1">
                         Betreuung
                     </div>
@@ -176,10 +177,10 @@ export function ClientDetailHeader({
                     </div>
                 </div>
 
-                <div className="w-px h-8 bg-border mx-6" />
+                <div className="w-px h-8 bg-border mx-6 hidden md:inline" />
 
                 {/* Jugendamt */}
-                <div className="pr-6">
+                <div className="pr-6 hidden md:flex md:flex-col">
                     <div className="text-[11px] font-medium text-muted uppercase tracking-[0.04em] mb-1">
                         Jugendamt
                     </div>
@@ -188,11 +189,11 @@ export function ClientDetailHeader({
                     </div>
                 </div>
 
-                <div className="w-px h-8 bg-border mx-6" />
+                <div className="w-px h-8 bg-border mx-6 hidden md:inline" />
 
                 {/* Kinder */}
-                <div className="pr-6">
-                    <div className="text-[11px] font-medium text-muted uppercase tracking-[0.04em] mb-1">
+                <div className="pr-6 hidden md:flex md:flex-col">
+                    <div className="text-[11px] font-medium text-muted uppercase tracking-[0.04em] mb-1 ">
                         Kinder
                     </div>
                     <div className="text-[12.5px] font-medium text-text">
@@ -201,7 +202,7 @@ export function ClientDetailHeader({
                     </div>
                 </div>
 
-                <div className="w-px h-8 bg-border mx-6" />
+                <div className="w-px h-8 bg-border mx-6 hidden md:inline" />
 
                 {/* Nächster Termin */}
                 <div>
@@ -217,7 +218,7 @@ export function ClientDetailHeader({
             </div>
 
             {/* Tab-Bar */}
-            <div className="flex gap-5">
+            <div className="flex gap-5 overflow-x-auto [&>*]:shrink-0">
                 {tabs.map((tab) => (
                     <TabBtn
                         key={tab.key}

@@ -183,8 +183,7 @@ export default function ClientForm({
             )}
 
             <div
-                className="grid gap-3"
-                style={{ gridTemplateColumns: '1fr 1fr' }}
+                className="grid gap-3 grid-cols-1 sm:grid-cols-2"
             >
                 {has('familyName') && (
                     <label className="flex flex-col gap-1">
@@ -237,8 +236,7 @@ export default function ClientForm({
             )}
 
             <div
-                className="grid gap-3"
-                style={{ gridTemplateColumns: '1fr 1fr' }}
+                className="grid gap-3 grid-cols-1 sm:grid-cols-2"
             >
                 {has('phone') && (
                     <label className="flex flex-col gap-1">
@@ -314,8 +312,7 @@ export default function ClientForm({
             )}
 
             <div
-                className="grid gap-3"
-                style={{ gridTemplateColumns: '1fr 1fr' }}
+                className="grid gap-3 grid-cols-1 sm:grid-cols-2"
             >
                 {has('weeklyHoursQuota') && (
                     <label className="flex flex-col gap-1">
@@ -357,8 +354,7 @@ export default function ClientForm({
             </div>
 
             <div
-                className="grid gap-3"
-                style={{ gridTemplateColumns: '1fr 1fr' }}
+                className="grid gap-3 grid-cols-1 sm:grid-cols-2"
             >
                 {has('startDate') && (
                     <label className="flex flex-col gap-1">

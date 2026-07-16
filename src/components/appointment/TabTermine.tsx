@@ -64,7 +64,8 @@ export function TabTermine({
             </div>
 
             <Card>
-                <table className="w-full border-collapse">
+                <div className="overflow-x-auto">
+                <table className="w-full border-collapse min-w-[560px]">
                     <thead>
                         <tr>
                             {[
@@ -201,6 +202,7 @@ export function TabTermine({
                         )}
                     </tbody>
                 </table>
+                </div>
             </Card>
         </div>
     );

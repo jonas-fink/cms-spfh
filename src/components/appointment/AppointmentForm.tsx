@@ -153,7 +153,7 @@ export default function AppointmentForm({
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-            <div className="grid grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <label className="flex flex-col gap-1">
                     <span className="text-[11.5px] text-muted font-medium">
                         Typ
@@ -206,7 +206,7 @@ export default function AppointmentForm({
                 />
             </label>
 
-            <div className="grid grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <label className="flex flex-col gap-1">
                     <span className="text-[11.5px] text-muted font-medium">
                         Stunden

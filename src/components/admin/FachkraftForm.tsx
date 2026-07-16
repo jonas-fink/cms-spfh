@@ -95,7 +95,7 @@ export default function FachkraftForm({
                 </div>
             )}
 
-            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
                 <label className="flex flex-col gap-1">
                     <span className="text-[11px] font-medium text-muted uppercase tracking-[0.04em]">
                         Vorname
@@ -150,8 +150,7 @@ export default function FachkraftForm({
             </label>
 
             <div
-                className="grid gap-3"
-                style={{ gridTemplateColumns: '1fr 1fr 1fr' }}
+                className="grid gap-3 grid-cols-1 sm:grid-cols-3"
             >
                 <label className="flex flex-col gap-1">
                     <span className="text-[11px] font-medium text-muted uppercase tracking-[0.04em]">

@@ -28,7 +28,7 @@ export function TabUebersicht({
         .slice(0, 3);
 
     return (
-        <div className="grid grid-cols-[1fr_320px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
             {/* Links */}
             <div className="flex flex-col gap-4">
                 <Card>

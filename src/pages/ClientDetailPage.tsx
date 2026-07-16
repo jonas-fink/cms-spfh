@@ -67,7 +67,9 @@ interface ClientDetailPageProps {
     mode?: 'fk' | 'admin';
 }
 
-export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps = {}) {
+export default function ClientDetailPage({
+    mode = 'fk',
+}: ClientDetailPageProps = {}) {
     const { id } = useParams<{ id: string }>();
     const isAdmin = mode === 'admin';
 
@@ -171,9 +173,7 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
             ? { date: upcoming[0].date, type: upcoming[0].type }
             : null;
 
-        setClient((c) =>
-            c ? { ...c, minutesThisWeek, nextAppt } : c,
-        );
+        setClient((c) => (c ? { ...c, minutesThisWeek, nextAppt } : c));
     }
 
     function handleCall() {
@@ -494,9 +494,7 @@ export default function ClientDetailPage({ mode = 'fk' }: ClientDetailPageProps 
                         onNewAppointment={
                             isAdmin ? undefined : handleNewAppointment
                         }
-                        onEditAppointment={
-                            isAdmin ? undefined : setEditAppt
-                        }
+                        onEditAppointment={isAdmin ? undefined : setEditAppt}
                         onDeleteAppointment={
                             isAdmin ? undefined : handleDeleteAppointment
                         }

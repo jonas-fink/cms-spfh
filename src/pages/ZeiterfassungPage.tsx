@@ -48,7 +48,7 @@ export default function ZeiterfassungPage() {
 
     return (
         <div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <SectionHeader title="Zeiterfassung" sub="Diese Woche" />
                 <Button
                     variant="secondary"
@@ -60,7 +60,7 @@ export default function ZeiterfassungPage() {
                 </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 my-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
                 <KPICard
                     label="Geleistet"
                     value={formatMinutes(overtime?.weekMinutes ?? 0)}
@@ -85,7 +85,7 @@ export default function ZeiterfassungPage() {
                         Keine Sitzungen in dieser Woche.
                     </div>
                 ) : (
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-border overflow-x-auto [&>*]:min-w-[440px]">
                         {sessions.map((s) => (
                             <button
                                 key={s._id}

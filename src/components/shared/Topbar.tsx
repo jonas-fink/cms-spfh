@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import Icon from './Icon';
 import NotificationBell from './NotificationBell';
+import ThemeToggle from './ThemeToggle';
 import ClockInWidget from './ClockInWidget';
 import { api } from '../../utils/api';
 import type { Client } from '../../types';
@@ -15,9 +16,10 @@ interface TopbarProps {
     breadcrumbs: Breadcrumb[];
     role?: 'fachkraft' | 'admin';
     onNavigate?: (path: string) => void;
+    onMenuClick?: () => void;
 }
 
-export default function Topbar({ breadcrumbs, role }: TopbarProps) {
+export default function Topbar({ breadcrumbs, role, onMenuClick }: TopbarProps) {
     const [focused, setFocused] = useState(false);
     const [query, setQuery] = useState('');
     const [clients, setClients] = useState<Client[]>([]);
@@ -53,7 +55,17 @@ export default function Topbar({ breadcrumbs, role }: TopbarProps) {
     }
 
     return (
-        <header className="h-14 sticky top-0 z-50 flex items-center px-6 gap-4 border-b border-border backdrop-blur-md bg-bg/85">
+        <header className="h-14 sticky top-0 z-50 flex items-center px-4 sm:px-6 gap-2 sm:gap-4 border-b border-border backdrop-blur-md bg-bg/85">
+            {/* Burger (nur mobil) */}
+            <button
+                type="button"
+                onClick={onMenuClick}
+                aria-label="Menü öffnen"
+                className="lg:hidden text-muted hover:text-text p-1.5 rounded-md transition-colors shrink-0"
+            >
+                <Icon name="menu" size={18} />
+            </button>
+
             {/* Breadcrumbs */}
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
                 {breadcrumbs.map((crumb, i) => (
@@ -82,7 +94,7 @@ export default function Topbar({ breadcrumbs, role }: TopbarProps) {
             </div>
 
             {/* Search */}
-            <div className="relative w-70 shrink-0">
+            <div className="relative w-70 shrink-0 hidden sm:block">
                 <Icon
                     name="search"
                     size={14}
@@ -144,6 +156,8 @@ export default function Topbar({ breadcrumbs, role }: TopbarProps) {
 
             {/* Zeiterfassung (nur Fachkraft) */}
             {role === 'fachkraft' && <ClockInWidget />}
+
+            <ThemeToggle />
 
             {/* Bell */}
             <NotificationBell />

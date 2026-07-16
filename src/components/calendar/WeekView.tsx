@@ -66,15 +66,16 @@ export default function WeekView({
 
     const today = new Date();
 
+    // ponytail: Mobil stapeln sich die 7 Tage zu einer Wochen-Agenda (lazy day-view); echtes Einzeltag-Paging bei Bedarf nachrüsten.
     return (
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
             {days.map((day, i) => {
                 const dayItems = itemsByDay.get(day.getTime()) ?? [];
                 const isToday = isSameDay(day, today);
                 return (
                     <div
                         key={day.toISOString()}
-                        className="flex flex-col gap-1.5 min-h-50"
+                        className="flex flex-col gap-1.5 min-h-0 sm:min-h-50"
                     >
                         <button
                             type="button"

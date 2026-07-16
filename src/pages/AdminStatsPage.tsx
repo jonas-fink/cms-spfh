@@ -106,8 +106,7 @@ export default function AdminStatsPage() {
             </div>
 
             <div
-                className="grid gap-3.5 mb-7"
-                style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
+                className="grid gap-3.5 mb-7 grid-cols-2 lg:grid-cols-4"
             >
                 <KPICard
                     label="Ø Auslastung"
@@ -200,6 +199,8 @@ export default function AdminStatsPage() {
                         const COLS = '1.8fr 80px 90px 110px 110px 1fr 70px';
                         return (
                             <>
+                                <div className="overflow-x-auto">
+                                <div className="min-w-[860px]">
                                 <div
                                     className="grid gap-4 px-4 py-2.5 border-b border-border"
                                     style={{ gridTemplateColumns: COLS }}
@@ -284,6 +285,8 @@ export default function AdminStatsPage() {
                                         </span>
                                     </div>
                                 ))}
+                                </div>
+                                </div>
                                 {workload.length === 0 && (
                                     <div className="px-4 py-10 text-center text-[13px] text-muted">
                                         Keine Daten.

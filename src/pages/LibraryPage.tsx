@@ -121,7 +121,12 @@ export default function LibraryPage() {
             if (fileFilter !== 'alle' && d.fileType !== fileFilter)
                 return false;
             if (q) {
-                const hay = [d.fileName, d.description ?? '', d.category, d.subfolder ?? '']
+                const hay = [
+                    d.fileName,
+                    d.description ?? '',
+                    d.category,
+                    d.subfolder ?? '',
+                ]
                     .join(' ')
                     .toLowerCase();
                 if (!hay.includes(q)) return false;
@@ -232,7 +237,7 @@ export default function LibraryPage() {
             {uploadOpen && (
                 <Card className="mb-4">
                     <div className="p-4 flex flex-wrap items-end gap-3">
-                        <label className="flex flex-col gap-1 min-w-44">
+                        <label className="flex flex-col gap-1 min-w-44 md:max-w-max w-full">
                             <span className="text-[11.5px] font-medium text-muted">
                                 Kategorie
                             </span>
@@ -249,7 +254,7 @@ export default function LibraryPage() {
                                 ))}
                             </datalist>
                         </label>
-                        <label className="flex flex-col gap-1 min-w-44">
+                        <label className="flex flex-col gap-1 min-w-44 md:max-w-max w-full">
                             <span className="text-[11.5px] font-medium text-muted">
                                 Unterordner (optional)
                             </span>
@@ -280,17 +285,19 @@ export default function LibraryPage() {
                         <button
                             disabled={!!upBusy}
                             onClick={() => fileRef.current?.click()}
-                            className="h-8 px-3.5 rounded-md border border-border bg-bg text-[12.5px] text-text hover:border-accent disabled:opacity-50"
+                            className="h-8 px-3.5 rounded-md border border-border bg-bg text-[12.5px] text-text hover:border-accent disabled:opacity-50 md:max-w-max w-full"
                         >
-                            {upBusy ? `Lädt hoch… (${upBusy})` : 'Datei wählen (PDF/DOCX · max. 10 MB)'}
+                            {upBusy
+                                ? `Lädt hoch… (${upBusy})`
+                                : 'Datei wählen (PDF/DOCX · max. 10 MB)'}
                         </button>
                     </div>
                 </Card>
             )}
 
-            <div className="flex gap-4">
+            <div className="flex md:flex-row flex-col gap-4">
                 {/* Ordnerbaum */}
-                <div className="w-56 shrink-0">
+                <div className="md:w-56 w-full shrink-0">
                     <Card>
                         <div className="px-4 py-3 border-b border-border">
                             <SectionHeader title="Ordner" />
@@ -397,7 +404,7 @@ export default function LibraryPage() {
                             placeholder="Datei, Beschreibung suchen…"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="h-8 px-3 rounded-md bg-bg border border-border text-[12.5px] text-text outline-none focus:border-accent w-70"
+                            className="h-8 px-3 rounded-md bg-bg border border-border text-[12.5px] text-text outline-none focus:border-accent md:w-70 w-full"
                         />
                     </div>
 
@@ -420,8 +427,7 @@ export default function LibraryPage() {
                         ) : (
                             filtered.map((d, i) => {
                                 const canDelete =
-                                    isAdmin ||
-                                    d.uploadedBy?._id === user?.id;
+                                    isAdmin || d.uploadedBy?._id === user?.id;
                                 return (
                                     <div
                                         key={d.id}
@@ -458,8 +464,14 @@ export default function LibraryPage() {
                                                 {d.subfolder
                                                     ? ` / ${d.subfolder}`
                                                     : ''}{' '}
-                                                · {formatFileSize(d.fileSizeBytes)}{' '}
-                                                · {formatDate(d.createdAt, { dateOnly: true })}
+                                                ·{' '}
+                                                {formatFileSize(
+                                                    d.fileSizeBytes,
+                                                )}{' '}
+                                                ·{' '}
+                                                {formatDate(d.createdAt, {
+                                                    dateOnly: true,
+                                                })}
                                                 {d.description
                                                     ? ` · ${d.description}`
                                                     : ''}

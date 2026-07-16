@@ -38,7 +38,7 @@ export default function Modal({
             onClick={onClose}
         >
             <div
-                className="bg-surface border border-border rounded-[10px] shadow-2xl w-full mx-4"
+                className="bg-surface border border-border rounded-[10px] shadow-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
                 style={{ maxWidth: width }}
                 onClick={(e) => e.stopPropagation()}
             >

@@ -27,6 +27,8 @@ const WorkloadTable = ({ data, onRowClick }: WorkloadTableProps) => {
 
     return (
         <div className="rounded-lg border border-border bg-surface overflow-hidden">
+            <div className="overflow-x-auto">
+            <div className="min-w-[560px]">
             {/* Table Header */}
             <div
                 className="grid gap-4 px-4 py-2.5 border-b border-border"
@@ -114,6 +116,8 @@ const WorkloadTable = ({ data, onRowClick }: WorkloadTableProps) => {
                     </div>
                 );
             })}
+            </div>
+            </div>
 
             {data.length === 0 && (
                 <div className="px-4 py-10 text-center text-[13px] text-muted">
